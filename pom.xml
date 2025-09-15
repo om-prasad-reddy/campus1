@@ -1,163 +1,245 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>campus1</groupId>
-	<artifactId>campus1</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>campus1</name>
-	<description>Campus Application project</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
-	<properties>
-		<java.version>21</java.version>
-	</properties>
-	<dependencies>
-	
-	
-	
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-<!--  Utilities  -->
-<dependency>
-<groupId>org.modelmapper</groupId>
-<artifactId>modelmapper</artifactId>
-<version>3.2.0</version>
-</dependency>
-<dependency>
-<groupId>org.xhtmlrenderer</groupId>
-<artifactId>flying-saucer-pdf</artifactId>
-<version>9.1.22</version>
-</dependency>
-	
-	
-	<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-data-jpa</artifactId>
-</dependency>
-<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-web</artifactId>
-</dependency>
-<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-mail</artifactId>
-</dependency>
-<!--  For date/time handling  -->
-<dependency>
-<groupId>com.fasterxml.jackson.datatype</groupId>
-<artifactId>jackson-datatype-jsr310</artifactId>
-</dependency>
-<dependency>
-<groupId>com.mysql</groupId>
-<artifactId>mysql-connector-j</artifactId>
-<scope>runtime</scope>
-</dependency>
-<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-thymeleaf</artifactId>
-</dependency>
-<dependency>
-<groupId>com.google.api-client</groupId>
-<artifactId>google-api-client</artifactId>
-<version>2.2.0</version>
-</dependency>
-<dependency>
-<groupId>com.google.apis</groupId>
-<artifactId>google-api-services-calendar</artifactId>
-<version>v3-rev20220715-2.0.0</version>
-</dependency>
-<dependency>
-<groupId>com.google.auth</groupId>
-<artifactId>google-auth-library-oauth2-http</artifactId>
-<version>1.16.0</version>
-</dependency>
-<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-actuator</artifactId>
-</dependency>
-<dependency>
-<groupId>com.twilio.sdk</groupId>
-<artifactId>twilio</artifactId>
-<version>9.12.0</version>
-</dependency>
-<dependency>
-<groupId>com.google.api-client</groupId>
-<artifactId>google-api-client</artifactId>
-<version>1.34.1</version>
-</dependency>
-<dependency>
-<groupId>com.google.oauth-client</groupId>
-<artifactId>google-oauth-client-jetty</artifactId>
-<version>1.34.1</version>
-</dependency>
-<dependency>
-<groupId>org.projectlombok</groupId>
-<artifactId>lombok</artifactId>
-<optional>true</optional>
-</dependency>
-<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-devtools</artifactId>
-<scope>runtime</scope>
-<optional>true</optional>
-</dependency>
-<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-validation</artifactId>
-</dependency>
-<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-test</artifactId>
-<scope>test</scope>
-</dependency>
-	
-	
-	</dependencies>
+    <!-- Parent POM for Spring Boot -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.5</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</path>
-					</annotationProcessorPaths>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <!-- Project Metadata -->
+    <groupId>campus1</groupId>
+    <artifactId>campus1</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>campus1</name>
+    <description>Campus Application project</description>
+    <url/>
+    <licenses>
+        <license/>
+    </licenses>
+    <developers>
+        <developer/>
+    </developers>
+    <scm>
+        <connection/>
+        <developerConnection/>
+        <tag/>
+        <url/>
+    </scm>
 
+    <!-- Properties -->
+    <properties>
+        <java.version>21</java.version>
+    </properties>
+
+    <!-- Dependencies -->
+    <dependencies>
+        <!-- Spring Boot Starters -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <!-- Purpose: Provides support for building web applications, including RESTful services and Spring MVC. -->
+        </dependency>
+        
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <!-- Purpose: Enables JPA (Java Persistence API) with Hibernate for database operations and ORM (Object-Relational Mapping). -->
+        </dependency>
+        
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-batch</artifactId>
+            <!-- Purpose: Adds support for Spring Batch, a framework for processing large volumes of data in batch jobs. -->
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <!-- Purpose: Provides email sending capabilities using SMTP, useful for notifications or alerts. -->
+        </dependency>
+        
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <!-- Purpose: Integrates Thymeleaf, a server-side Java template engine for rendering HTML emails or web pages. -->
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <!-- Purpose: Exposes production-ready features like health checks, metrics, and monitoring endpoints. -->
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <!-- Purpose: Adds bean validation support using Jakarta Bean Validation (e.g., @NotNull, @Size). -->
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <!-- Purpose: Provides testing utilities including JUnit, Mockito, and Spring Test for unit and integration tests. -->
+        </dependency>
+
+        <!-- Database -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+            <!-- Purpose: MySQL JDBC driver for connecting to a MySQL database at runtime. -->
+        </dependency>
+
+        <!-- Development Tools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+            <!-- Purpose: Enhances development with automatic restarts, live reload, and improved debugging. -->
+        </dependency>
+        
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+            <!-- Purpose: Reduces boilerplate code by generating getters, setters, constructors, etc., using annotations. -->
+        </dependency>
+
+        <!-- Utilities -->
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>3.2.0</version>
+            <!-- Purpose: Simplifies object mapping between DTOs (Data Transfer Objects) and entities. -->
+        </dependency>
+        
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-pdf</artifactId>
+            <version>9.1.22</version>
+            <!-- Purpose: Generates PDF files from HTML and CSS, useful for creating reports or documents. -->
+        </dependency>
+
+        <!-- Google APIs -->
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>2.2.0</version>
+            <!-- Purpose: Core library for accessing Google APIs, providing HTTP transport and JSON parsing. -->
+        </dependency>
+        
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-calendar</artifactId>
+            <version>v3-rev20220715-2.0.0</version>
+            <!-- Purpose: Specific client library for interacting with Google Calendar API (v3). -->
+        </dependency>
+        
+        <dependency>
+            <groupId>com.google.auth</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+            <version>1.16.0</version>
+            <!-- Purpose: Handles OAuth2 authentication for Google APIs, enabling secure access. -->
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-jetty</artifactId>
+            <version>1.34.1</version>
+            <!-- Purpose: Provides OAuth2 support with Jetty HTTP client for Google API authentication. -->
+        </dependency>
+
+        <!-- Twilio for SMS -->
+        <dependency>
+            <groupId>com.twilio.sdk</groupId>
+            <artifactId>twilio</artifactId>
+            <version>9.12.0</version>
+            <!-- Purpose: SDK for sending SMS and making voice calls using Twilio's communication platform. -->
+        </dependency>
+
+        <!-- Jackson for Date/Time Handling -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <!-- Purpose: Extends Jackson to handle Java 8 Date and Time API (e.g., LocalDate, ZonedDateTime) in JSON serialization. -->
+        </dependency>
+
+        <!-- Spring Boot Admin -->
+        <dependency>
+            <groupId>de.codecentric</groupId>
+            <artifactId>spring-boot-admin-starter-server</artifactId>
+            <version>3.2.3</version>
+            <!-- Purpose: Sets up a Spring Boot Admin server for monitoring and managing multiple applications. -->
+        </dependency>
+        
+    
+        
+        <dependency>
+    <groupId>de.codecentric</groupId>
+    <artifactId>spring-boot-admin-server-ui</artifactId>
+    <version>3.2.3</version>
+</dependency>
+
+<dependency>
+    <groupId>de.codecentric</groupId>
+    <artifactId>spring-boot-admin-starter-client</artifactId>
+    <version>3.2.3</version>
+</dependency>
+
+<dependency>
+    <groupId>com.fasterxml.jackson.datatype</groupId>
+    <artifactId>jackson-datatype-jdk8</artifactId>
+</dependency>
+<dependency>
+    <groupId>com.fasterxml.jackson.datatype</groupId>
+    <artifactId>jackson-datatype-jsr310</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>com.fasterxml.jackson.module</groupId>
+    <artifactId>jackson-module-parameter-names</artifactId>
+</dependency>
+
+
+        
+    </dependencies>
+
+    <!-- Build Configuration -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
