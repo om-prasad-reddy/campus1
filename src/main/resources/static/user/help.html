@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support - Campus1</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Font Awesome for additional icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Professional theme variables */
+        :root {
+            --primary-50: #f0f6ff;
+            --primary-100: #e0eaff;
+            --primary-200: #b3d1ff;
+            --primary-300: #7fb3ff;
+            --primary-400: #5396ff;
+            --primary-500: #2978ff;
+            --primary-600: #1558d6;
+            --primary-700: #0e3c8c;
+            --primary-800: #0a295c;
+            --primary-900: #071a36;
+            --neutral-50: #f9fafb;
+            --neutral-100: #f3f4f6;
+            --neutral-200: #e5e7eb;
+            --neutral-300: #d1d5db;
+            --neutral-400: #9ca3af;
+            --neutral-500: #6b7280;
+            --neutral-600: #4b5563;
+            --neutral-700: #374151;
+            --neutral-800: #1f2937;
+            --neutral-900: #111827;
+            --success-50: #e6f9f0;
+            --success-500: #22c55e;
+            --success-600: #16a34a;
+            --warning-50: #fff7e6;
+            --warning-500: #fbbf24;
+            --warning-600: #f59e0b;
+            --error-50: #ffe6e6;
+            --error-500: #ef4444;
+            --error-600: #dc2626;
+            --gradient-primary: linear-gradient(135deg, #2978ff 0%, #1558d6 100%);
+            --gradient-secondary: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+            --gradient-success: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            --gradient-warning: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            --gradient-error: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+            --shadow-md: 0 4px 12px -1px rgb(0 0 0 / 0.10), 0 2px 8px -2px rgb(0 0 0 / 0.08);
+            --shadow-lg: 0 10px 24px -3px rgb(0 0 0 / 0.10), 0 4px 12px -4px rgb(0 0 0 / 0.08);
+            --shadow-xl: 0 20px 32px -5px rgb(0 0 0 / 0.12), 0 8px 20px -6px rgb(0 0 0 / 0.10);
+            --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.18);
+            --radius-lg: 0.75rem;
+            --radius-xl: 1.25rem;
+            --radius-2xl: 2rem;
+            --radius-3xl: 2.5rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.5rem;
+            --space-6: 2rem;
+            --space-8: 3rem;
+            --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
+            background: var(--neutral-50);
+            color: var(--neutral-800);
+            min-height: 100vh;
+            line-height: 1.7;
+            letter-spacing: 0.01em;
+        }
+        /* Elegant animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: -1;
+            background: radial-gradient(ellipse at 60% 10%, #2978ff22 0%, transparent 70%),
+                        radial-gradient(ellipse at 10% 80%, #22c55e22 0%, transparent 70%),
+                        radial-gradient(ellipse at 90% 90%, #fbbf2422 0%, transparent 70%);
+            animation: bgMove 18s linear infinite alternate;
+        }
+        @keyframes bgMove {
+            0% { filter: blur(0px); opacity: 1; }
+            50% { filter: blur(2px); opacity: 0.95; }
+            100% { filter: blur(0px); opacity: 1; }
+        }
+        .main-content {
+            transition: margin-left var(--transition-normal);
+            margin-left: 16rem;
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            background: transparent;
+            width: calc(100% - 16rem);
+            animation: fadeIn 0.7s cubic-bezier(0.4,0,0.2,1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(24px);}
+            to { opacity: 1; transform: none;}
+        }
+        .main-content.sidebar-collapsed {
+            margin-left: 4rem;
+            width: calc(100% - 4rem);
+            box-shadow: var(--shadow-md);
+        }
+        /* Responsive breakpoints for different screen sizes */
+        /* Tablet/Laptop (768px - 1024px) */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .main-content { margin-left: 4rem !important; width: calc(100% - 4rem) !important; }
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .main-content { margin-left: 0 !important; width: 100% !important; margin-top: 64px; }
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--space-6) var(--space-6);
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: var(--space-8);
+            padding: var(--space-8) 0 var(--space-6);
+            background: var(--gradient-primary);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-lg);
+        }
+        .page-header h1 {
+            font-size: 2.7rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: var(--space-4);
+            letter-spacing: 0.02em;
+            text-shadow: 0 4px 24px rgba(41,120,255,0.18);
+        }
+        .page-header p {
+            font-size: 1.15rem;
+            color: #e0eaff;
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 500;
+        }
+        .support-info {
+            background: #fff;
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8) var(--space-6);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--neutral-100);
+            margin-bottom: var(--space-8);
+            margin-top: 110px;
+        }
+        .support-info h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-700);
+            margin-bottom: var(--space-6);
+            text-align: center;
+        }
+        .support-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-6);
+        }
+        .support-info-item {
+            text-align: center;
+            padding: var(--space-5);
+            border-radius: var(--radius-xl);
+            background: var(--neutral-50);
+            transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+        }
+        .support-info-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        .support-info-item i {
+            font-size: 2.5rem;
+            color: var(--primary-500);
+            margin-bottom: var(--space-3);
+        }
+        .support-info-item h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-700);
+            margin-bottom: var(--space-2);
+        }
+        .support-info-item p {
+            color: var(--neutral-600);
+            font-size: 1rem;
+        }
+        .contact-section {
+            background: #fff;
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8) var(--space-6);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--neutral-100);
+            margin-bottom: var(--space-8);
+        }
+        .contact-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-700);
+            margin-bottom: var(--space-6);
+            text-align: center;
+        }
+        .contact-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-6);
+        }
+        .contact-method {
+            text-align: center;
+            padding: var(--space-5);
+            border-radius: var(--radius-xl);
+            background: var(--neutral-50);
+            transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+        }
+        .contact-method:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        .contact-method i {
+            font-size: 2.5rem;
+            color: var(--primary-500);
+            margin-bottom: var(--space-3);
+        }
+        .contact-method h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-700);
+            margin-bottom: var(--space-2);
+        }
+        .contact-method p {
+            color: var(--neutral-600);
+            font-size: 1rem;
+        }
+        .faq-section {
+            background: #fff;
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8) var(--space-6);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--neutral-100);
+        }
+        .faq-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-700);
+            margin-bottom: var(--space-6);
+            text-align: center;
+        }
+        .faq-item {
+            margin-bottom: var(--space-5);
+            border-bottom: 1px solid var(--neutral-100);
+            padding-bottom: var(--space-5);
+        }
+        .faq-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .faq-question {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-700);
+            margin-bottom: var(--space-3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .faq-question i {
+            transition: transform var(--transition-normal);
+        }
+        .faq-question.active i {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            color: var(--neutral-600);
+            line-height: 1.6;
+            display: none;
+            padding-left: var(--space-4);
+        }
+        .faq-answer.active {
+            display: block;
+        }
+        #sidebar {
+            transition: width var(--transition-normal), box-shadow var(--transition-normal);
+            box-shadow: var(--shadow-md);
+        }
+        #sidebar.sidebar-collapsed { width: 4rem !important; }
+        #sidebar.sidebar-expanded { width: 16rem !important; }
+        @media (max-width: 768px) {
+            .main-container { padding: 0 var(--space-4) var(--space-4); }
+            .page-header h1 { font-size: 2rem; }
+            .support-info-grid { grid-template-columns: 1fr; }
+            .contact-methods { grid-template-columns: 1fr; }
+        }
+        
+        /* Notification badge styles */
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 9999px;
+            height: 20px;
+            min-width: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            font-size: 10px;
+            font-weight: bold;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            z-index: 10;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .notification-badge.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Notification button styles */
+        .notification-btn {
+            position: relative;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .notification-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Logout confirmation modal styles */
+        .logout-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .logout-modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .logout-modal-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #fee2e2;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 16px;
+        }
+        
+        .logout-modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .logout-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .logout-btn-cancel {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+        }
+        
+        .logout-btn-cancel:hover {
+            background-color: #e5e7eb;
+        }
+        
+        .logout-btn-confirm {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+        }
+        
+        .logout-btn-confirm:hover {
+            background-color: #dc2626;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Include Sidebar -->
+    <div id="sidebar-container"></div>
+    
+    <!-- Main Content Area -->
+    <main id="main-content" class="main-content">
+        <div class="main-container">
+           
+            
+            <div class="support-info">
+                <h2>Support Information</h2>
+                <div class="support-info-grid">
+                    <div class="support-info-item">
+                        <i class="fas fa-clock"></i>
+                        <h3>Response Times</h3>
+                        <p>Urgent: Within 1 hour<br>High: Within 4 hours<br>Medium: Within 24 hours<br>Low: Within 48 hours</p>
+                    </div>
+                    
+                    <div class="support-info-item">
+                        <i class="fas fa-lightbulb"></i>
+                        <h3>Support Tips</h3>
+                        <p>• Be specific about the issue<br>• Include error messages<br>• Mention steps to reproduce<br>• Attach screenshots if helpful</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-section">
+                <h2>Contact Support</h2>
+                <div class="contact-methods">
+                    <div class="contact-method">
+                        <i class="fas fa-envelope"></i>
+                        <h3>Email Support</h3>
+                        <p>Send us an email at support@campus1.edu</p>
+                    </div>
+                    <div class="contact-method">
+                        <i class="fas fa-phone"></i>
+                        <h3>Phone Support</h3>
+                        <p>Call us at +1-555-CAMPUS1</p>
+                    </div>
+                    <div class="contact-method">
+                        <i class="fas fa-comments"></i>
+                        <h3>Live Chat</h3>
+                        <p>Chat with our support team online</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="faq-section">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        How do I reset my password?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Use the "Forgot Password" link on the login page. You'll receive an email with instructions to reset your password.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        How do I update my profile?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Go to the Profile section and click "Update Profile". You can edit your personal information, contact details, and preferences.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Who can I contact for urgent issues?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        For urgent issues, please call our support hotline at +1-555-CAMPUS1 or use the "Urgent" priority when contacting us through email.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        How long does it take to get a response?
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Response times vary by priority: Urgent issues are addressed within 1 hour, High priority within 4 hours, Medium priority within 24 hours, and Low priority within 48 hours.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-modal" class="logout-modal" style="display: none;">
+        <div class="logout-modal-content">
+            <div class="logout-modal-icon">
+                <i data-lucide="log-out" class="h-8 w-8 text-red-500"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Confirm Logout</h3>
+            <p class="text-gray-600 mb-6">Are you sure you want to log out of your account?</p>
+            <div class="logout-modal-buttons">
+                <button id="logout-cancel-btn" class="logout-btn logout-btn-cancel">Cancel</button>
+                <button id="logout-confirm-btn" class="logout-btn logout-btn-confirm">Logout</button>
+            </div>
+        </div>
+    </div>
+    
+   <script>
+    // Toggle FAQ items
+    function toggleFAQ(element) {
+        const answer = element.nextElementSibling;
+        const isActive = element.classList.contains('active');
+        
+        // Close all FAQ items
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.classList.remove('active');
+            q.nextElementSibling.classList.remove('active');
+        });
+        
+        // Open clicked item if it wasn't active
+        if (!isActive) {
+            element.classList.add('active');
+            answer.classList.add('active');
+        }
+    }
+    
+    // Sidebar Integration
+    class PageManager {
+        constructor() {
+            this.loadSidebar();
+        }
+        
+        loadSidebar() {
+            fetch('sidebar.html')
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const overlay = doc.getElementById('sidebar-overlay');
+                    const sidebar = doc.getElementById('sidebar');
+                    const header = doc.getElementById('top-header');
+                    const mobileHeader = doc.getElementById('mobile-header');
+                    const style = doc.querySelector('style');
+                    
+                    if (style) {
+                        document.head.appendChild(style);
+                    }
+                    
+                    const container = document.getElementById('sidebar-container');
+                    if (overlay) container.appendChild(overlay);
+                    if (sidebar) container.appendChild(sidebar);
+                    
+                    if (header) {
+                        document.body.insertBefore(header, document.getElementById('main-content'));
+                    }
+                    if (mobileHeader) {
+                        document.body.insertBefore(mobileHeader, document.getElementById('main-content'));
+                    }
+                    
+                    this.initializeSidebarFunctionality();
+                    lucide.createIcons();
+                    
+                    setTimeout(() => {
+                        this.updateWelcomeMessage();
+                        this.updateCurrentDate();
+                        this.addNotificationNavigation();
+                    }, 100);
+                })
+                .catch(error => console.error('Error loading sidebar:', error));
+        }
+        
+        initializeSidebarFunctionality() {
+            class SidebarManager {
+                constructor() {
+                    this.sidebar = document.getElementById('sidebar');
+                    this.sidebarToggle = document.getElementById('sidebar-toggle');
+                    this.sidebarOverlay = document.getElementById('sidebar-overlay');
+                    this.logoutBtn = document.getElementById('logout-btn');
+                    this.mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+                    this.mobileNotificationBtn = document.getElementById('mobile-notification-btn');
+                    this.isCollapsed = false;
+                    this.isMobile = window.innerWidth <= 768;
+                    this.isLaptop = window.innerWidth > 768 && window.innerWidth <= 1024;
+                    this.isDesktop = window.innerWidth > 1024;
+                    
+                    this.init();
+                }
+                
+                init() {
+                    // Set initial state based on screen size
+                    this.handleResize();
+                    
+                    // Event listeners
+                    if (this.sidebarToggle) {
+                        this.sidebarToggle.addEventListener('click', () => this.toggleSidebar());
+                    }
+                    if (this.sidebarOverlay) {
+                        this.sidebarOverlay.addEventListener('click', () => this.closeMobileSidebar());
+                    }
+                    if (this.logoutBtn) {
+                        this.logoutBtn.addEventListener('click', () => this.showLogoutModal());
+                    }
+                    if (this.mobileSidebarToggle) {
+                        this.mobileSidebarToggle.addEventListener('click', () => this.toggleSidebar());
+                    }
+                    if (this.mobileNotificationBtn) {
+                        this.mobileNotificationBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.handleMobileNotification();
+                        });
+                    }
+                    
+                    // Desktop notification button
+                    const desktopNotificationBtn = document.getElementById('notification-btn');
+                    if (desktopNotificationBtn) {
+                        desktopNotificationBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.handleMobileNotification();
+                        });
+                    }
+                    
+                    // Window resize handler
+                    window.addEventListener('resize', () => this.handleResize());
+                    
+                    // Set active page
+                    this.setActivePage();
+                    
+                    // Initialize icons
+                    lucide.createIcons();
+                    
+                    // Fetch notification count on initialization
+                    this.fetchNotificationCount();
+                    
+                    // Set up periodic refresh of notification count (every 5 minutes)
+                    setInterval(() => this.fetchNotificationCount(), 300000);
+                    
+                    // Set initial main content state
+                    setTimeout(() => {
+                        this.notifyMainContent();
+                    }, 100);
+                    
+                    // Setup logout modal event listeners
+                    this.setupLogoutModal();
+                }
+                
+                setupLogoutModal() {
+                    const logoutModal = document.getElementById('logout-modal');
+                    const logoutCancelBtn = document.getElementById('logout-cancel-btn');
+                    const logoutConfirmBtn = document.getElementById('logout-confirm-btn');
+                    
+                    // Cancel button - just close the modal
+                    logoutCancelBtn.addEventListener('click', () => {
+                        logoutModal.style.display = 'none';
+                    });
+                    
+                    // Confirm button - perform logout
+                    logoutConfirmBtn.addEventListener('click', () => {
+                        this.performLogout();
+                    });
+                    
+                    // Close modal when clicking outside
+                    logoutModal.addEventListener('click', (e) => {
+                        if (e.target === logoutModal) {
+                            logoutModal.style.display = 'none';
+                        }
+                    });
+                }
+                
+                showLogoutModal() {
+                    const logoutModal = document.getElementById('logout-modal');
+                    logoutModal.style.display = 'flex';
+                }
+                
+                performLogout() {
+                    // Clear all session data
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // Redirect to login page
+                    window.location.href = 'login.html';
+                }
+                
+                fetchNotificationCount() {
+                    const API_BASE_URL = 'http://localhost:8081';
+                    let loggedInUser = sessionStorage.getItem('loggedInUser') || localStorage.getItem('persistentLogin');
+                    
+                    if (!loggedInUser) {
+                        this.updateNotificationBadge(0);
+                        return;
+                    }
+                    
+                    try {
+                        const user = JSON.parse(loggedInUser);
+                        const userId = user.id;
+                        
+                        if (!userId) {
+                            this.updateNotificationBadge(0);
+                            return;
+                        }
+                        
+                        // Use fetchNotificationCounts from notification.js if available
+                        if (typeof window.fetchNotificationCounts === 'function') {
+                            window.fetchNotificationCounts().then(() => {
+                                const unreadCountElement = document.getElementById('unread-count');
+                                const count = unreadCountElement ? parseInt(unreadCountElement.textContent) || 0 : 0;
+                                this.updateNotificationBadge(count);
+                            }).catch(error => {
+                                console.error('Error using fetchNotificationCounts:', error);
+                                this.updateNotificationBadge(0);
+                            });
+                        } else {
+                            // Fallback to direct API call
+                            fetch(`${API_BASE_URL}/api/user/notifications/counts?userId=${userId}`)
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error(`HTTP error! status: ${response.status}`);
+                                    }
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    this.updateNotificationBadge(data.unread || 0);
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching notification count:', error);
+                                    this.updateNotificationBadge(0);
+                                });
+                        }
+                    } catch (e) {
+                        console.error('Error parsing user data:', e);
+                        this.updateNotificationBadge(0);
+                    }
+                }
+                
+                updateNotificationBadge(count) {
+                    const desktopBadge = document.getElementById('desktop-notification-count');
+                    const mobileBadge = document.getElementById('mobile-notification-count');
+                    
+                    if (count > 0) {
+                        if (desktopBadge) {
+                            desktopBadge.textContent = count > 99 ? '99+' : count;
+                            desktopBadge.classList.add('visible');
+                            desktopBadge.classList.remove('hidden');
+                        }
+                        if (mobileBadge) {
+                            mobileBadge.textContent = count > 99 ? '99+' : count;
+                            mobileBadge.classList.add('visible');
+                            mobileBadge.classList.remove('hidden');
+                        }
+                    } else {
+                        if (desktopBadge) {
+                            desktopBadge.classList.remove('visible');
+                            desktopBadge.classList.add('hidden');
+                        }
+                        if (mobileBadge) {
+                            mobileBadge.classList.remove('visible');
+                            mobileBadge.classList.add('hidden');
+                        }
+                    }
+                }
+                
+                toggleSidebar() {
+                    if (this.isMobile) {
+                        this.toggleMobileSidebar();
+                    } else {
+                        this.toggleDesktopSidebar();
+                    }
+                }
+                
+                toggleDesktopSidebar() {
+                    this.isCollapsed = !this.isCollapsed;
+                    
+                    if (this.isCollapsed) {
+                        this.sidebar.classList.remove('sidebar-expanded');
+                        this.sidebar.classList.add('sidebar-collapsed');
+                    } else {
+                        this.sidebar.classList.remove('sidebar-collapsed');
+                        this.sidebar.classList.add('sidebar-expanded');
+                    }
+                    
+                    // Notify main content to adjust
+                    this.notifyMainContent();
+                    
+                    // Save state
+                    localStorage.setItem('sidebarCollapsed', this.isCollapsed);
+                }
+                
+                toggleMobileSidebar() {
+                    const isOpen = this.sidebar.classList.contains('mobile-open');
+                    
+                    if (isOpen) {
+                        this.closeMobileSidebar();
+                    } else {
+                        this.openMobileSidebar();
+                    }
+                }
+                
+                openMobileSidebar() {
+                    this.sidebar.classList.add('mobile-open');
+                    this.sidebarOverlay.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                }
+                
+                closeMobileSidebar() {
+                    this.sidebar.classList.remove('mobile-open');
+                    this.sidebarOverlay.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+                
+                handleResize() {
+                    const wasMobile = this.isMobile;
+                    this.isMobile = window.innerWidth <= 768;
+                    this.isLaptop = window.innerWidth > 768 && window.innerWidth <= 1024;
+                    this.isDesktop = window.innerWidth > 1024;
+                    
+                    if (wasMobile !== this.isMobile) {
+                        // Screen size changed
+                        if (this.isMobile) {
+                            // Switched to mobile
+                            this.closeMobileSidebar();
+                            this.sidebar.classList.remove('sidebar-collapsed', 'sidebar-expanded');
+                        } else {
+                            // Switched to desktop
+                            this.sidebar.classList.remove('mobile-open');
+                            this.sidebarOverlay.classList.add('hidden');
+                            document.body.style.overflow = '';
+                            
+                            // Restore desktop state
+                            const savedState = localStorage.getItem('sidebarCollapsed');
+                            this.isCollapsed = savedState === 'true';
+                            
+                            if (this.isCollapsed) {
+                                this.sidebar.classList.remove('sidebar-expanded');
+                                this.sidebar.classList.add('sidebar-collapsed');
+                            } else {
+                                this.sidebar.classList.remove('sidebar-collapsed');
+                                this.sidebar.classList.add('sidebar-expanded');
+                            }
+                        }
+                        
+                        this.notifyMainContent();
+                    } else if (!this.isMobile) {
+                        // Desktop - ensure proper state on initial load
+                        const savedState = localStorage.getItem('sidebarCollapsed');
+                        this.isCollapsed = savedState === 'true';
+                        
+                        if (this.isCollapsed) {
+                            this.sidebar.classList.remove('sidebar-expanded');
+                            this.sidebar.classList.add('sidebar-collapsed');
+                        } else {
+                            this.sidebar.classList.remove('sidebar-collapsed');
+                            this.sidebar.classList.add('sidebar-expanded');
+                        }
+                    }
+                }
+                
+                setActivePage() {
+                    const currentPage = window.location.pathname.split('/').pop() || 'help.html';
+                    const pageMap = {
+                        'dashboard.html': 'dashboard',
+                        'profile.html': 'profile',
+                        'resumes.html': 'resumes',
+                        'notifications.html': 'notifications',
+                        'help.html': 'help'
+                    };
+                    
+                    const activePage = pageMap[currentPage];
+                    if (activePage) {
+                        const activeLink = document.querySelector(`[data-page="${activePage}"]`);
+                        if (activeLink) {
+                            activeLink.classList.add('active');
+                        }
+                    }
+                }
+                
+                handleMobileNotification() {
+                    window.location.href = 'notifications.html';
+                }
+                
+                notifyMainContent() {
+                    // Update header position based on sidebar state
+                    const header = document.getElementById('top-header');
+                    if (header) {
+                        if (this.isMobile) {
+                            header.classList.remove('sidebar-collapsed');
+                        } else if (this.isCollapsed) {
+                            header.classList.add('sidebar-collapsed');
+                        } else {
+                            header.classList.remove('sidebar-collapsed');
+                        }
+                    }
+                    
+                    // Dispatch custom event to notify main content of sidebar state change
+                    const event = new CustomEvent('sidebarStateChanged', {
+                        detail: {
+                            isCollapsed: this.isCollapsed,
+                            isMobile: this.isMobile
+                        }
+                    });
+                    window.dispatchEvent(event);
+                }
+            }
+            
+            // Initialize sidebar
+            window.sidebarManager = new SidebarManager();
+            window.SidebarManager = SidebarManager;
+        }
+        
+        handleSidebarStateChanges() {
+            window.addEventListener('sidebarStateChanged', (event) => {
+                const { isCollapsed, isMobile } = event.detail;
+                const mainContent = document.getElementById('main-content');
+                
+                if (!mainContent) return;
+                
+                if (!isMobile) {
+                    if (isCollapsed) {
+                        mainContent.classList.add('sidebar-collapsed');
+                    } else {
+                        mainContent.classList.remove('sidebar-collapsed');
+                    }
+                } else {
+                    // On mobile, always remove the collapsed class
+                    mainContent.classList.remove('sidebar-collapsed');
+                }
+            });
+        }
+        
+        updateWelcomeMessage() {
+            const welcomeMessage = document.getElementById('welcome-message');
+            const headerSubtitle = document.getElementById('header-subtitle');
+            
+            if (welcomeMessage) {
+                welcomeMessage.textContent = 'Help & Support';
+            }
+            if (headerSubtitle) {
+                headerSubtitle.textContent = 'Get assistance and find answers to common questions';
+            }
+            
+            const currentDateElement = document.getElementById('current-date');
+            if (currentDateElement) {
+                const now = new Date();
+                const options = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit', 
+                };
+                currentDateElement.textContent = now.toLocaleDateString('en-US', options);
+            }
+        }
+        
+        updateCurrentDate() {
+            const dateElement = document.getElementById('current-date');
+            if (dateElement) {
+                const now = new Date();
+                const options = { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                dateElement.textContent = now.toLocaleDateString('en-US', options);
+            }
+        }
+        
+        addNotificationNavigation() {
+            const notificationBtn = document.getElementById('notification-btn');
+            if (notificationBtn) {
+                notificationBtn.addEventListener('click', () => {
+                    window.location.href = 'notifications.html';
+                });
+            }
+            const mobileNotificationBtn = document.getElementById('mobile-notification-btn');
+            if (mobileNotificationBtn) {
+                mobileNotificationBtn.addEventListener('click', () => {
+                    window.location.href = 'notifications.html';
+                });
+            }
+        }
+    }
+    
+    // Initialize page when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        new PageManager();
+    });
+</script>
+</body>
+</html>

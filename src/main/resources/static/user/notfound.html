@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles to match React component classes */
+        .bg-gray-100 {
+            background-color: #f3f4f6;
+        }
+        .text-gray-600 {
+            color: #4b5563;
+        }
+        .text-blue-500 {
+            color: #3b82f6;
+        }
+        .hover\:text-blue-700:hover {
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Link to display header and footer -->
+    <div class="text-right p-2 text-sm">
+        <a href="header.html" class="text-blue-500 hover:underline mr-4">View Header</a>
+        <a href="footer.html" class="text-blue-500 hover:underline">View Footer</a>
+    </div>
+
+    <div class="min-h-screen flex items-center justify-center bg-gray-100">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold mb-4">404</h1>
+            <p class="text-xl text-gray-600 mb-4">Oops! Page not found</p>
+            <a href="/" class="text-blue-500 hover:text-blue-700 underline">
+                Return to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Before closing </body> -->
+    <div class="text-center p-4 text-sm">
+        <a href="header.html" class="text-blue-500 hover:underline mr-4">View Header</a>
+        <a href="footer.html" class="text-blue-500 hover:underline">View Footer</a>
+    </div>
+
+    <script>
+        // Log 404 error with the current pathname
+        console.error("404 Error: User attempted to access non-existent route:", window.location.pathname);
+    </script>
+</body>
+</html>

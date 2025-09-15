@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Campus1</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- HTML2PDF Library for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Include Sidebar -->
+    <div id="sidebar-container"></div>
+    
+    <!-- Main Content Area -->
+    <main id="main-content" class="main-content">
+        
+        <!-- Profile Section -->
+        <section class="py-16 px-6 bg-secondary">
+            <div class="container mx-auto max-w-4xl">
+                <div class="bg-card rounded-lg shadow-lg profile-section">
+                    <!-- Profile Content -->
+                    <div class="profile-content">
+                        <!-- Profile Section -->
+                        <div id="profileContent" class="profile-section">
+                            <div class="profile-section-content space-y-6">
+                                <!-- Profile Details Display -->
+                                <div id="profile-details" class="space-y-4"></div>
+                        <!-- Edit Form (Initially Hidden) -->
+                        <div id="edit-profile-form" class="hidden form-container">
+                            <div class="form-tabs" id="form-tabs">
+                                <button class="tab-btn active" data-tab="personal">Personal Details</button>
+                                <button class="tab-btn" data-tab="education">Education</button>
+                                <button class="tab-btn" data-tab="skills">Skills</button>
+                                <button class="tab-btn" data-tab="experience">Work Experience <span class="optional-label"></span></button>
+                                <button class="tab-btn" data-tab="projects">Projects</button>
+                                <button class="tab-btn" data-tab="certifications">Certifications</button>
+                                <button class="tab-btn" data-tab="achievements">Achievements <span class="optional-label"></span></button>
+                                <button class="tab-btn" data-tab="languages">Languages</button>
+                                <button class="tab-btn" data-tab="hobbies">Hobbies</button>
+                                <button class="tab-btn" data-tab="references">References</button>
+                            </div>
+                            <div id="form-content">
+                                <!-- Personal Details Form -->
+                                <div class="form-tab-content active" id="personalTab">
+                                    <form id="personalForm">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="fullName">Full Name</label>
+                                                <input type="text" id="fullName" name="fullName" disabled>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="email">Email</label>
+                                                <input type="email" id="email" name="email" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="dob" class="required">Date of Birth</label>
+                                                <input type="date" id="dob" name="dob" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="gender" class="required">Gender</label>
+                                                <select id="gender" name="gender" required>
+                                                    <option value="">Select Gender</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                    <option value="Other">Other</option>
+                                                    <option value="Prefer not to say">Prefer not to say</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="phone" class="required">Phone Number</label>
+                                                <div class="phone-input-container">
+                                                    <select id="countryCode" name="countryCode" class="country-code-select" required>
+                                                        <option value="+91" data-digits="10">🇮🇳 +91</option>
+                                                        <option value="+1" data-digits="10">🇺🇸 +1</option>
+                                                        <option value="+44" data-digits="10">🇬🇧 +44</option>
+                                                        <option value="+61" data-digits="9">🇦🇺 +61</option>
+                                                        <option value="+49" data-digits="11">🇩🇪 +49</option>
+                                                        <option value="+33" data-digits="9">🇫🇷 +33</option>
+                                                        <option value="+39" data-digits="10">🇮🇹 +39</option>
+                                                        <option value="+34" data-digits="9">🇪🇸 +34</option>
+                                                        <option value="+81" data-digits="10">🇯🇵 +81</option>
+                                                        <option value="+86" data-digits="11">🇨🇳 +86</option>
+                                                        <option value="+82" data-digits="10">🇰🇷 +82</option>
+                                                        <option value="+65" data-digits="8">🇸🇬 +65</option>
+                                                        <option value="+60" data-digits="9">🇲🇾 +60</option>
+                                                        <option value="+66" data-digits="9">🇹🇭 +66</option>
+                                                        <option value="+62" data-digits="10">🇮🇩 +62</option>
+                                                        <option value="+63" data-digits="10">🇵🇭 +63</option>
+                                                        <option value="+84" data-digits="9">🇻🇳 +84</option>
+                                                        <option value="+971" data-digits="9">🇦🇪 +971</option>
+                                                        <option value="+966" data-digits="9">🇸🇦 +966</option>
+                                                    </select>
+                                                    <input type="tel" id="phone" name="phone" placeholder="Enter phone number" required>
+                                                </div>
+                                                
+                                                <div id="phoneValidationMessage" class="phone-validation-message"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="address" class="required">Address</label>
+                                                <input type="text" id="address" name="address" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="fatherName" class="required">Father's Name</label>
+                                                <input type="text" id="fatherName" name="fatherName" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="motherName" class="required">Mother's Name</label>
+                                                <input type="text" id="motherName" name="motherName" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="linkedinUrl">LinkedIn URL</label>
+                                                <input type="url" id="linkedinUrl" name="linkedinUrl">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="githubUrl">GitHub URL</label>
+                                                <input type="url" id="githubUrl" name="githubUrl">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="portfolioUrl">Portfolio URL</label>
+                                                <input type="url" id="portfolioUrl" name="portfolioUrl">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="objective" class="required">Professional Objective</label>
+                                            <textarea id="objective" name="objective" rows="4" maxlength="250" class="character-limit-textarea" placeholder="Brief description of your career goals..." required></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="profilePhoto" class="required">Profile Photo</label>
+                                            <div class="file-upload-container">
+                                                <div class="image-preview" id="profilePhotoPreview" onclick="document.getElementById('profilePhotoInput').click()">
+                                                    <input type="file" 
+                                                           id="profilePhotoInput" 
+                                                           name="profilePhoto" 
+                                                           accept=".jpg,.jpeg,.png,.gif" 
+                                                           class="file-input"
+                                                           onchange="handleImageUpload(this, 'profilePhoto')"
+                                                           style="display: none;">
+                                                    <div id="profilePhotoPlaceholder" class="upload-placeholder">
+                                                        <i data-lucide="camera" class="upload-icon"></i>
+                                                        <span>Click to upload profile photo</span>
+                                                        <small>Accepted formats: JPG, PNG, GIF (Max: 5MB)</small>
+                                                    </div>
+                                                    <div id="profilePhotoDisplay" class="image-preview-display" style="display: none;">
+                                                        <img id="profilePhotoImg" src="" alt="Profile Photo Preview" />
+                                                    </div>
+                                                </div>
+                                                <div class="image-remove-container" id="profilePhotoRemoveContainer" style="display: none;">
+                                                    <button type="button" onclick="removeImage('profilePhoto')" class="remove-image-btn">Remove Photo</button>
+                                                </div>
+                                            </div>
+                                            <div id="profilePhotoRequiredMessage" class="required-photo-message" style="display: none;">
+                                                Profile photo is required for your resume.
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="signature">Digital Signature</label>
+                                            <div class="file-upload-container">
+                                                <div class="image-preview" id="signaturePreview" onclick="document.getElementById('signatureInput').click()">
+                                                    <input type="file" 
+                                                           id="signatureInput" 
+                                                           name="signature" 
+                                                           accept=".jpg,.jpeg,.png,.gif" 
+                                                           class="file-input"
+                                                           onchange="handleImageUpload(this, 'signature')"
+                                                           style="display: none;">
+                                                    <div id="signaturePlaceholder" class="upload-placeholder">
+                                                        <i data-lucide="pen-tool" class="upload-icon"></i>
+                                                        <span>Click to upload digital signature</span>
+                                                        <small>Accepted formats: JPG, PNG, GIF (Max: 5MB)</small>
+                                                    </div>
+                                                    <div id="signatureDisplay" class="image-preview-display" style="display: none;">
+                                                        <img id="signatureImg" src="" alt="Signature Preview" />
+                                                    </div>
+                                                </div>
+                                                <div class="image-remove-container" id="signatureRemoveContainer" style="display: none;">
+                                                    <button type="button" onclick="removeImage('signature')" class="remove-image-btn">Remove Signature</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <!-- Education Form -->
+                                <div class="form-tab-content" id="educationTab">
+                                    <div class="dynamic-section">
+                                        <div class="dynamic-section-header">
+                                            <h3 class="text-lg font-semibold">Education</h3>
+                                            <button type="button" class="btn btn-primary" id="addEducationBtn">Add Education</button>
+                                        </div>
+                                        <div id="educationList" class="dynamic-list"></div>
+                                    </div>
+                                </div>
+                                <!-- Skills Form -->
+                                <div class="form-tab-content" id="skillsTab">
+                                    <div class="dynamic-section">
+                                        <div class="dynamic-section-header">
+                                            <h3 class="text-lg font-semibold">Skills</h3>
+                                            <button type="button" class="btn btn-primary" id="addSkillBtn">Add Skill</button>
+                                        </div>
+                                        <div id="skillsList" class="dynamic-list"></div>
+                                    </div>
+                                </div>
+                                <!-- Work Experience Form -->
+                                <div class="form-tab-content" id="experienceTab">
+                                    <div class="dynamic-section">
+                                        <div class="dynamic-section-header">
+                                            <h3 class="text-lg font-semibold">Work Experience (Optional)</h3>
+                                            <button type="button" class="btn btn-primary" id="addExperienceBtn">Add Experience</button>
+                                        </div>
+                                        
+                                        <!-- Optional Experience Indicator -->
+                                        <div id="experienceOptionalIndicator" class="optional-experience-indicator">
+                                            <div class="text-center py-8 px-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                                <div class="text-gray-500 mb-2">
+                                                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6.5"></path>
+                                                    </svg>
+                                                </div>
+                                                <h4 class="text-lg font-medium text-gray-700 mb-2">Work Experience (Optional)</h4>
+                                                <p class="text-gray-500 mb-4">Add your work experience to showcase your professional background</p>
+                                                <button type="button" class="btn btn-primary" onclick="addFirstExperience()">
+                                                    Add Your First Experience
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div id="experienceList" class="dynamic-list"></div>
+                                    </div>
+                                </div>
+                                <!-- Projects Form -->
+                                <div class="form-tab-content" id="projectsTab">
+                                    <div class="dynamic-section">
+                                        <div class="dynamic-section-header">
+                                            <h3 class="text-lg font-semibold">Projects</h3>
+                                            <button type="button" class="btn btn-primary" id="addProjectBtn">Add Project</button>
+                                        </div>
+                                        <div id="projectsList" class="dynamic-list"></div>
+                                    </div>
+                                </div>
+                                <!-- Certifications Form -->
+                                <div class="form-tab-content" id="certificationsTab">
+                                    <div class="dynamic-section">
+                                        <div class="dynamic-section-header">
+                                            <h3 class="text-lg font-semibold">Certifications</h3>
+                                            <button type="button" class="btn btn-primary" id="addCertificationBtn">Add Certification</button>
+                                        </div>
+                                        <div id="certificationsList" class="dynamic-list"></div>
+                                    </div>
+                                </div>
+                                <!-- Achievements Form -->
+                                <div class="form-tab-content" id="achievementsTab">
+                                    <div class="dynamic-section">
+                                        <div class="dynamic-section-header">
+                                            <h3 class="text-lg font-semibold">Achievements (Optional)</h3>
+                                            <button type="button" class="btn btn-primary" id="addAchievementBtn">Add Achievement</button>
+                                        </div>
+                                        
+                                        <!-- Optional Achievement Indicator -->
+                                        <div id="achievementOptionalIndicator" class="optional-achievement-indicator">
+                                            <div class="text-center py-8 px-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                                <div class="text-gray-500 mb-2">
+                                                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                                                    </svg>
+                                                </div>
+                                                <h4 class="text-lg font-medium text-gray-700 mb-2">Achievements (Optional)</h4>
+                                                <p class="text-gray-500 mb-4">Showcase your accomplishments, awards, and recognitions</p>
+                                                <button type="button" class="btn btn-primary" onclick="addFirstAchievement()">
+                                                    Add Your First Achievement
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div id="achievementsList" class="dynamic-list"></div>
+                                    </div>
+                                </div>
+                                <!-- Languages Form -->
+                                <div class="form-tab-content" id="languagesTab">
+                                    <div class="dynamic-section">
+                                        <div class="dynamic-section-header">
+                                            <h3 class="text-lg font-semibold">Languages</h3>
+                                            <button type="button" class="btn btn-primary" id="addLanguageBtn">Add Language</button>
+                                        </div>
+                                        <div id="languagesList" class="dynamic-list"></div>
+                                    </div>
+                                </div>
+                                <!-- Hobbies Form -->
+                                <div class="form-tab-content" id="hobbiesTab">
+                                    <div class="dynamic-section">
+                                        <div class="dynamic-section-header">
+                                            <h3 class="text-lg font-semibold">Hobbies</h3>
+                                            <button type="button" class="btn btn-primary" id="addHobbyBtn">Add Hobby</button>
+                                        </div>
+                                        <div id="hobbiesList" class="dynamic-list"></div>
+                                    </div>
+                                </div>
+                                <!-- References Form -->
+                                <div class="form-tab-content" id="referencesTab">
+                                    <div class="dynamic-section">
+                                        <div class="dynamic-section-header">
+                                            <h3 class="text-lg font-semibold">References</h3>
+                                            <button type="button" class="btn btn-primary" id="addReferenceBtn">Add Reference</button>
+                                        </div>
+                                        <div id="referencesList" class="dynamic-list"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Form Actions -->
+                            <div class="form-actions">
+                                <button type="button" id="cancelEditBtn" class="btn btn-secondary">Cancel</button>
+                                <div class="space-x-3">
+                                    <button type="button" id="prevTabBtn" class="btn">Previous</button>
+                                    <button type="button" id="nextTabBtn" class="btn btn-primary">Next</button>
+                                    <button type="button" id="saveProfileBtn" class="btn">Save Profile</button>
+                                </div>
+                            </div>
+                        </div>
+                            <!-- Action Buttons -->
+                            <div class="action-buttons">
+                                <button id="editProfileBtn" class="btn btn-primary">
+                                    <i data-lucide="edit-3" class="w-5 h-5 inline-block mr-2"></i>
+                                    Edit Profile
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    
+    </main>
+    
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-modal" class="logout-modal" style="display: none;">
+        <div class="logout-modal-content">
+            <div class="logout-modal-icon">
+                <i data-lucide="log-out" class="h-8 w-8 text-red-500"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Confirm Logout</h3>
+            <p class="text-gray-600 mb-6">Are you sure you want to log out of your account?</p>
+            <div class="logout-modal-buttons">
+                <button id="logout-cancel-btn" class="logout-btn logout-btn-cancel">Cancel</button>
+                <button id="logout-confirm-btn" class="logout-btn logout-btn-confirm">Logout</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Notification</title>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+	<script src="navigation.js"></script>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		html,
+		body {
+			height: 100%;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		}
+
+		/* Ensure proper scrolling within navigation layout */
+		body {
+			overflow: hidden !important;
+		}
+
+		/* Page-specific styles - Override navigation main styles */
+		.main {
+			background-color: #ffffff !important;
+			min-height: calc(100vh - 60px) !important;
+			padding: 20px !important;
+			overflow-y: auto !important;
+		}
+
+		.notification-container {
+			max-width: 1200px;
+			margin: 0 auto;
+			height: auto;
+			position: relative;
+			z-index: 1;
+			padding-bottom: 40px;
+		}
+
+		.notification-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 30px;
+			margin-bottom: 30px;
+		}
+
+		.send-notification-card {
+			background: #ffffff;
+			border-radius: 12px;
+			padding: 30px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			border: 1px solid #e5e7eb;
+		}
+
+		.card-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 20px;
+		}
+
+		.card-header i {
+			font-size: 24px;
+			color: #3b82f6;
+			margin-right: 12px;
+		}
+
+		.card-header h2 {
+			color: #1f2937;
+			font-size: 20px;
+			font-weight: 600;
+		}
+
+		.notification-form {
+			background-color: transparent;
+			padding: 0;
+			border-radius: 0;
+			border: none;
+		}
+
+		.form-group {
+			margin-bottom: 20px;
+		}
+
+		.form-group label {
+			display: inline;
+			font-weight: 600;
+			color: #374151;
+			margin-bottom: 8px;
+			font-size: 14px;
+			margin-left: 10px;
+		}
+
+		.form-group input,
+		.form-group textarea {
+			width: 100%;
+			padding: 12px;
+			border: 1px solid #d1d5db;
+			border-radius: 8px;
+			font-size: 14px;
+			transition: border-color 0.3s ease;
+		}
+
+		.form-group input:focus,
+		.form-group textarea:focus {
+			outline: none;
+			border-color: #3b82f6;
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+		}
+
+		.form-group textarea {
+			resize: vertical;
+			min-height: 120px;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		}
+
+		.send-button {
+			background: #3b82f6;
+			color: white;
+			padding: 12px 24px;
+			border: none;
+			border-radius: 8px;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: background-color 0.3s ease;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+		}
+
+		.send-button:hover {
+			background: #2563eb;
+		}
+
+		.send-button:disabled {
+			background: #9ca3af;
+			cursor: not-allowed;
+		}
+
+		.recent-notifications-card {
+			background: #ffffff;
+			border-radius: 12px;
+			padding: 30px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			border: 1px solid #e5e7eb;
+		}
+
+		.notification-history {
+			margin-top: 0;
+			background-color: transparent;
+			border-radius: 0;
+			border: none;
+			padding: 0;
+		}
+
+		.notification-item {
+			border: 1px solid #e5e7eb;
+			border-radius: 8px;
+			padding: 16px;
+			margin-bottom: 16px;
+			transition: box-shadow 0.3s ease;
+			background-color: #ffffff;
+		}
+
+		.toggle-buttons {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 20px;
+		}
+
+		.toggle-btn {
+			flex: 1;
+			padding: 10px;
+			border: 1px solid #3b82f6;
+			background: white;
+			color: #3b82f6;
+			font-weight: 600;
+			border-radius: 6px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+
+		.toggle-btn.active {
+			background: #3b82f6;
+			color: white;
+		}
+
+		.notification-section.hidden {
+			display: none;
+		}
+
+		.notification-item:hover {
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		}
+
+		.notification-item:last-child {
+			margin-bottom: 0;
+		}
+
+		.notification-subject {
+			font-weight: 600;
+			color: #1f2937;
+			margin-bottom: 8px;
+			font-size: 16px;
+		}
+
+		.notification-message {
+			color: #4b5563;
+			margin-bottom: 12px;
+			line-height: 1.5;
+			font-size: 14px;
+		}
+
+		.notification-meta {
+			font-size: 12px;
+			color: #6b7280;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.no-notifications {
+			text-align: center;
+			color: #6b7280;
+			padding: 60px 20px;
+			background: #f9fafb;
+			border-radius: 8px;
+			border: 2px dashed #d1d5db;
+		}
+
+		.no-notifications i {
+			font-size: 48px;
+			color: #d1d5db;
+			margin-bottom: 16px;
+			display: block;
+		}
+
+		.no-notifications p {
+			font-size: 16px;
+			margin: 0;
+		}
+
+		.notification-item {
+			padding: 10px;
+			border: 1px solid #ccc;
+			border-radius: 6px;
+			margin-bottom: 10px;
+			background-color: #f9f9f9;
+		}
+
+		.notification-subject {
+			font-weight: bold;
+		}
+
+		.notification-message {
+			margin-top: 4px;
+		}
+
+		/* mark-read button styling */
+		.mark-read-btn {
+			margin-top: 6px;
+			padding: 4px 8px;
+			font-size: 12px;
+			color: #fff;
+			background-color: #f56565;
+			/* red */
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+		}
+
+		.mark-read-btn:hover {
+			background-color: #c53030;
+		}
+
+		.notification-meta {
+			font-size: 12px;
+			color: #555;
+			margin-top: 6px;
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.success-message {
+			background-color: #d1fae5;
+			color: #065f46;
+			padding: 12px 16px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+			border: 1px solid #a7f3d0;
+			display: none;
+		}
+
+		.character-count {
+			font-size: 12px;
+			color: #6b7280;
+			text-align: right;
+			margin-top: 5px;
+		}
+
+		/* Dropdown styles */
+		.dropdown {
+			position: relative;
+			width: 100%;
+			max-width: 600px;
+			user-select: none;
+		}
+
+		.dropdown-header {
+			border: 1px solid #ccc;
+			border-radius: 8px;
+			padding: 10px 12px;
+			background: white;
+			cursor: pointer;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			font-size: 16px;
+			min-height: 44px;
+		}
+
+		.dropdown-header::after {
+			content: '▼';
+			font-size: 12px;
+			color: #555;
+			margin-left: 10px;
+		}
+
+		.dropdown-list {
+			position: absolute;
+			top: 100%;
+			left: 0;
+			right: 0;
+			background: white;
+			border: 1px solid #ccc;
+			border-radius: 8px;
+			max-height: 180px;
+			overflow-y: auto;
+			z-index: 100;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+			margin-top: 4px;
+			display: none;
+		}
+
+		.dropdown-list.open {
+			display: block;
+		}
+
+		.dropdown-item {
+			padding: 8px 12px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			cursor: pointer;
+			font-size: 15px;
+			color: #333;
+		}
+
+		.dropdown-item:hover {
+			background: #f3f4f6;
+		}
+
+		.dropdown-item input[type="checkbox"] {
+			width: 18px;
+			height: 18px;
+			cursor: pointer;
+		}
+
+		/* User list container */
+		#userListContainer {
+			margin-top: 20px;
+			border: 1px solid #ddd;
+			border-radius: 6px;
+			padding: 10px;
+			background: #fafafa;
+			max-height: 320px;
+			overflow-y: auto;
+			display: none;
+			/* Hide initially */
+		}
+
+		/* Search input above user list */
+		#userSearchInput {
+			width: 100%;
+			padding: 8px 10px;
+			margin-bottom: 10px;
+			font-size: 14px;
+			border: 1px solid #ccc;
+			border-radius: 6px;
+			box-sizing: border-box;
+		}
+
+		.user-admin-header {
+			display: grid;
+			grid-template-columns: 30px 1fr 1fr;
+			font-weight: 700;
+			font-size: 14px;
+			margin-bottom: 6px;
+			color: #2563eb;
+			user-select: none;
+			padding-left: 4px;
+		}
+
+		.checkbox-item {
+			display: grid;
+			grid-template-columns: 30px 1fr 1fr;
+			align-items: center;
+			margin-bottom: 8px;
+			font-size: 14px;
+			color: #374151;
+			column-gap: 10px;
+		}
+
+		.checkbox-item input[type="checkbox"] {
+			cursor: pointer;
+			width: 18px;
+			height: 18px;
+			justify-self: center;
+		}
+
+		.select-all-container {
+			font-weight: 700;
+			margin-bottom: 10px;
+			border-bottom: 1px solid #ddd;
+			padding-bottom: 6px;
+			user-select: none;
+			cursor: pointer;
+			color: #111827;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.select-all-container input[type="checkbox"] {
+			width: 18px;
+			height: 18px;
+			cursor: pointer;
+		}
+
+		/* Priority dropdown */
+		.form-group select {
+			width: 100%;
+			padding: 12px;
+			border: 1px solid #d1d5db;
+			border-radius: 8px;
+			font-size: 14px;
+			cursor: pointer;
+			transition: border-color 0.3s ease;
+		}
+
+		.form-group select:focus {
+			outline: none;
+			border-color: #3b82f6;
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+		}
+
+		/* Priority badge styles */
+		.priority-badge {
+			display: inline-block;
+			padding: 4px 10px;
+			border-radius: 12px;
+			font-size: 12px;
+			font-weight: bold;
+			margin-left: 8px;
+			color: white;
+		}
+
+		.priority-high {
+			background-color: #ef4444;
+			/* red */
+		}
+
+		/* Top stats container */
+		.top-stats {
+    display: flex;
+    justify-content: space-between; /* push boxes to edges */
+    align-items: stretch;           /* make boxes same height */
+    gap: 20px;                      /* space between boxes */
+    margin: 20px;                   /* top, right, bottom, left gap */
+    padding: 0 10px;                /* optional inner padding */
+    width: calc(100% - 40px);       /* full screen minus margins */
+    box-sizing: border-box;
+}
+
+.stat-box {
+    flex: 1;                        /* equal width */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;         /* vertical centering */
+    align-items: center;             /* horizontal centering */
+    height: 70px;                    /* ~2cm */
+    padding: 8px 12px;               /* reduce padding for compact look */
+    background: linear-gradient(135deg, #3b82f6, #60a5fa); /* gradient for style */
+    border-radius: 12px;             /* slightly rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* subtle shadow */
+    color: #ffffff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* hover effect */
+    cursor: default;
+}
+
+.stat-box:hover {
+    transform: translateY(-2px);     /* slight lift on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.stat-box .label {
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 4px;             /* smaller spacing between label and value */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.stat-box .value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+		.priority-low {
+			background-color: #22c55e;
+			/* green */
+		}
+
+		.priority-urgent {
+			background-color: #f97316;
+			/* orange */
+		}
+
+		/* Responsive Design */
+		@media (max-width : 768px) {
+			.notification-grid {
+				grid-template-columns: 1fr;
+				gap: 20px;
+			}
+
+			.main {
+				padding: 15px !important;
+				min-height: calc(100vh - 60px) !important;
+			}
+
+			.send-notification-card,
+			.recent-notifications-card {
+				padding: 20px;
+			}
+
+			.notification-meta {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 4px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="main">
+		<div class="notification-container">
+			<!-- Top centered stat boxes for Sent and Received -->
+			<div class="top-stats">
+				<div class="stat-box" aria-label="Total notifications you sent">
+					<span class="label">Sent</span> <span class="value" id="sentCount">0</span>
+				</div>
+				<div class="stat-box" aria-label="Total notifications you received">
+					<span class="label">Received</span> <span class="value" id="receivedCount">0</span>
+				</div>
+			</div>
+			<div class="notification-grid">
+				<div class="send-notification-card">
+					<div class="card-header">
+						<i class="fas fa-paper-plane"></i>
+						<h2>Send Notification</h2>
+					</div>
+
+					<div class="success-message" id="successMessage">
+						<i class="fas fa-check-circle"></i> Notification sent successfully
+						to all administrators!
+					</div>
+
+					<form class="notification-form" id="notificationForm" onsubmit="sendNotification(event)">
+						<div class="form-group">
+							<label for="notificationSubject">Select Admin *</label>
+							<div class="dropdown" id="adminDropdown">
+								<div class="dropdown-header" id="dropdownHeader">Select
+									Admin(s)...</div>
+								<div class="dropdown-list" id="dropdownList"></div>
+							</div>
+
+							<label for="notificationSubject">Subject *</label> <input type="text"
+								id="notificationSubject" name="subject" required
+								placeholder="Enter notification subject">
+						</div>
+
+						<!-- ✅ Priority dropdown -->
+						<div class="form-group">
+							<label for="priority">Priority *</label> <select id="priority" name="priority" required>
+								<option value="">-- Select Priority --</option>
+								<option value="High">High</option>
+								<option value="Low">Low</option>
+								<option value="Urgent">Urgent</option>
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label for="notificationMessage">Message *</label>
+							<textarea id="notificationMessage" name="message" required
+								placeholder="Enter your message here..." oninput="updateCharacterCount()"></textarea>
+							<div class="character-count" id="characterCount">0
+								characters</div>
+						</div>
+
+						<button type="submit" class="send-button">
+							<i class="fas fa-paper-plane"></i> Send Notification
+						</button>
+					</form>
+				</div>
+
+				<!-- Recent Notifications Card -->
+				<div class="recent-notifications-card">
+					<div class="card-header">
+						<i class="fas fa-history"></i>
+						<h2>Notifications</h2>
+					</div>
+
+					<!-- Toggle buttons -->
+					<div class="toggle-buttons">
+						<button class="toggle-btn active" id="receivedBtn">Received</button>
+						<button class="toggle-btn" id="sentBtn">Sent</button>
+					</div>
+
+					<div class="notification-history">
+						<div id="receivedSection" class="notification-section">
+							<!-- Received notifications will load here -->
+						</div>
+						<div id="sentSection" class="notification-section hidden">
+							<!-- Sent notifications will load here -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+
+		// Init
+		document.addEventListener('DOMContentLoaded', () => {
+			const managerEmail = localStorage.getItem("managerEmail");
+			if (!managerEmail) {
+				alert("Login required");
+				window.location.href = "/manager/loginform";
+				return;
+			}
+			fetchAdmins();
+			updateDropdownHeader();
+			updateCharacterCount();
+			loadNotificationHistory();
+		});
+		let selectedAdminIds = [];
+
+		const managerEmail = localStorage.getItem("managerEmail");
+
+		//Character counter
+		function updateCharacterCount() {
+			const messageTextarea = document.getElementById('notificationMessage');
+			const characterCount = document.getElementById('characterCount');
+			characterCount.textContent = `${messageTextarea.value.length} characters`;
+		}
+
+		//---- SEND NOTIFICATION ----
+		async function sendNotification(event) {
+			event.preventDefault();
+
+			const subject = document.getElementById('notificationSubject').value.trim();
+			const message = document.getElementById('notificationMessage').value.trim();
+			const priority = document.getElementById('priority').value;
+
+			if (!subject || !message || !priority) {
+				alert('Please fill in all required fields.');
+				return;
+			}
+
+			if (selectedAdminIds.length === 0) {
+				alert('Please select at least one admin.');
+				return;
+			}
+
+			try {
+				const url = "/api/manager/notifications/send";
+				const payload = {
+					sentBy: managerEmail,
+					subject,
+					message,
+					priority,
+					adminIds: selectedAdminIds.map(Number) // ensure numeric
+				};
+
+				const response = await fetch(url, {
+					method: "POST",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify(payload)
+				});
+
+				if (!response.ok) throw new Error("Failed to send notification");
+
+				const saved = await response.json();
+
+				document.getElementById('successMessage').style.display = 'block';
+				document.getElementById('notificationForm').reset();
+				updateCharacterCount();
+				loadNotificationHistory();
+
+				setTimeout(() => {document.getElementById('successMessage').style.display = 'none';}, 5000);
+
+			} catch (err) {
+				console.error("Error sending:", err);
+				alert("Error sending notification");
+			}
+		}
+
+		//---- FETCH ADMINS ----
+		async function fetchAdmins() {
+			try {
+				const res = await fetch(`/api/manager/admins?managerEmail=${managerEmail}`);
+				const admins = await res.json();
+				populateDropdown(admins);
+			} catch (err) {
+				console.error("Error fetching admins:", err);
+			}
+		}
+
+
+
+
+		// ---- ADMIN DROPDOWN ----
+		const adminDropdown = document.getElementById('adminDropdown');
+		const dropdownHeader = document.getElementById('dropdownHeader');
+		const dropdownList = document.getElementById('dropdownList');
+		const userListContainer = document.getElementById('userListContainer');
+		const userSearchInput = document.getElementById('userSearchInput');
+
+		function populateDropdown(admins) {
+			dropdownList.innerHTML = '';
+			admins.forEach(admin => {
+				const item = document.createElement('div');
+				item.className = 'dropdown-item';
+
+				const checkbox = document.createElement('input');
+				checkbox.type = 'checkbox';
+				checkbox.value = admin.id;
+				checkbox.id = `admin-checkbox-${admin.id}`;
+
+				const label = document.createElement('label');
+				label.htmlFor = checkbox.id;
+				label.textContent = admin.name;
+
+				item.appendChild(checkbox);
+				item.appendChild(label);
+				dropdownList.appendChild(item);
+
+				// ✅ update selectedAdminIds dynamically
+				checkbox.addEventListener('change', (e) => {
+					if (e.target.checked) {
+						if (!selectedAdminIds.includes(admin.id)) selectedAdminIds.push(admin.id);
+					} else {
+						selectedAdminIds = selectedAdminIds.filter(id => id !== admin.id);
+					}
+					updateDropdownHeader();
+				});
+			});
+		}
+
+		function updateDropdownHeader() {
+			if (selectedAdminIds.length === 0) {
+				dropdownHeader.textContent = 'Select Admin(s)...';
+			} else {
+				dropdownHeader.textContent = `${selectedAdminIds.length} admin${selectedAdminIds.length > 1 ? 's' : ''} selected`;
+			}
+		}
+
+
+		// --- Toggle between Received & Sent ---
+		const receivedBtn = document.getElementById("receivedBtn");
+		const sentBtn = document.getElementById("sentBtn");
+		const receivedSection = document.getElementById("receivedSection");
+		const sentSection = document.getElementById("sentSection");
+
+		receivedBtn.addEventListener("click", () => {
+			receivedBtn.classList.add("active");
+			sentBtn.classList.remove("active");
+			receivedSection.classList.remove("hidden");
+			sentSection.classList.add("hidden");
+		});
+
+		sentBtn.addEventListener("click", () => {
+			sentBtn.classList.add("active");
+			receivedBtn.classList.remove("active");
+			sentSection.classList.remove("hidden");
+			receivedSection.classList.add("hidden");
+		});
+
+
+		async function loadNotificationHistory() {
+			try {
+				const sentRes = await fetch(`/api/manager/notifications/sent?email=${encodeURIComponent(managerEmail)}`);
+				const recvRes = await fetch(`/api/manager/notifications/received?email=${encodeURIComponent(managerEmail)}`);
+
+				if (!sentRes.ok || !recvRes.ok) throw new Error("Failed to fetch history");
+
+				let sent = await sentRes.json();
+				let received = await recvRes.json();
+
+				// Sort latest first
+				sent.sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt));
+				received.sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt));
+
+				// Render notifications
+				renderNotifications(received, "receivedSection", "No received notifications yet.", true);
+				renderNotifications(sent, "sentSection", "No sent notifications yet.", false);
+
+				// ✅ Update counts
+				document.getElementById("receivedCount").textContent = received.length;
+				document.getElementById("sentCount").textContent = sent.length;
+
+				// 🔑 Calculate unread (from received only)
+				const unreadCount = received.filter(n => n.read === false).length;
+
+				if (window.navigation && typeof window.navigation.updateNotificationBadge === "function") {
+					window.navigation.updateNotificationBadge(unreadCount);
+				}
+
+			} catch (err) {
+				console.error("Error fetching history:", err);
+			}
+		}
+		function renderNotifications(list, containerId, emptyMessage, isReceived) {
+			const container = document.getElementById(containerId);
+			container.innerHTML = "";
+
+			if (list.length === 0) {
+				container.innerHTML = `<p class="no-notifications">${emptyMessage}</p>`;
+				return;
+			}
+
+			list.forEach(notification => {
+				const date = new Date(notification.sentAt);
+				const isUnread = isReceived && notification.read === false;
+
+				// ✅ Priority badge
+				let priorityClass = "";
+				if (notification.priority) {
+					const p = notification.priority.toLowerCase();
+					if (p === "high") priorityClass = "priority-badge priority-high";
+					else if (p === "low") priorityClass = "priority-badge priority-low";
+					else if (p === "urgent") priorityClass = "priority-badge priority-urgent";
+				}
+
+				const notifEl = document.createElement("div");
+				notifEl.className = `notification-item ${isUnread ? 'received' : ''}`;
+				notifEl.dataset.id = notification.id;
+
+				notifEl.innerHTML = `
+		            <div class="notification-subject">
+		        		<span>Subject : ${notification.subject}</span>
+		                ${notification.priority ? `<span class="${priorityClass}">${notification.priority}</span>` : ""}
+		            </div>
+		            <div class="notification-message">Message : ${notification.message}</div>
+		            <div class="notification-meta">
+		                <span>Sent By : ${notification.sentBy}</span>
+		                <span>Role ${notification.sentRole}</span>
+		                <span>Sent Date & Time : ${date.toLocaleDateString()} ${date.toLocaleTimeString()}</span>
+		            </div>
+		        `;
+
+				// ✅ Show "Mark as Read" button only if unread
+				if (isUnread) {
+					const btn = document.createElement("button");
+					btn.className = "mark-read-btn";
+					btn.textContent = "Mark as Read";
+					btn.addEventListener("click", async () => {
+						try {
+							const res = await fetch(`/api/manager/notifications/mark-read?notificationId=${notification.id}&managerEmail=${encodeURIComponent(managerEmail)}`, {
+								method: "POST"
+							});
+							if (!res.ok) throw new Error("Failed to mark as read");
+
+							notifEl.classList.remove("received");
+							btn.remove();
+						} catch (err) {
+							console.error(err);
+							alert("Failed to mark as read");
+						}
+					});
+					notifEl.appendChild(btn);
+				}
+
+				container.appendChild(notifEl);
+			});
+		}
+
+		// Dropdown toggle
+		dropdownHeader.addEventListener('click', () => {
+			dropdownList.classList.toggle('open');
+		});
+		document.addEventListener('click', (e) => {
+			if (!adminDropdown.contains(e.target)) dropdownList.classList.remove('open');
+		});
+
+	</script>
+</body>
+
+</html>

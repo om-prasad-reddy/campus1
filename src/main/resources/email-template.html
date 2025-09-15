@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Email Notification</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f6f6f6;
+                line-height: 1.6;
+            }
+
+            .logo-container {
+                text-align: center;
+                padding: 20px 0 10px;
+            }
+
+            .logo-container img {
+                display: block !important;
+                margin: 0 auto !important;
+                max-width: 200px !important;
+                width: 100% !important;
+                height: auto !important;
+                border: 0 !important;
+                line-height: 100% !important;
+                padding-bottom: 20px !important;
+            }
+
+            /* Responsive tweak for mobile */
+            @media only screen and (max-width: 480px) {
+                .logo-container img {
+                    max-width: 140px !important;
+                }
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 20px auto;
+                background: #ffffff;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 20px;
+            }
+
+            h2 {
+                color: #333;
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+
+            p {
+                font-size: 14px;
+                color: #555;
+                margin: 8px 0;
+            }
+
+            .footer {
+                margin-top: 20px;
+                font-size: 12px;
+                color: #888;
+                text-align: center;
+                border-top: 1px solid #eee;
+                padding-top: 10px;
+            }
+
+            .social-icons {
+                margin-top: 10px;
+            }
+
+            .social-icons a {
+                margin: 0 8px;
+                display: inline-block;
+                text-decoration: none;
+            }
+
+            .social-icons img {
+                width: 20px;
+                height: 20px;
+                vertical-align: middle;
+            }
+        </style>
+    </head>
+
+<body>
+    <div class="logo-container">
+        <img src="https://cyetechnology.com/assets/logo.png" alt="CYE Technology Pvt. Ltd. Logo">
+    </div>
+    <div class="container">
+        <p><b>Dear Sir/Madam,</b><p>
+        <p>{{message}}</p>
+
+        <div class="footer">
+            <p>This is an auto-generated e-mail. Please do not reply to this e-mail.</p>
+            <p>&copy; CYE Technology. All rights reserved.</p>
+
+            <div class="social-icons">
+                <a href="https://facebook.com" target="_blank">
+                    <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook">
+                </a>
+                <a href="https://twitter.com" target="_blank">
+                    <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter">
+                </a>
+                <a href="https://linkedin.com" target="_blank">
+                    <img src="https://cdn-icons-png.flaticon.com/512/733/733561.png" alt="LinkedIn">
+                </a>
+                <a href="https://instagram.com" target="_blank">
+                    <img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Instagram">
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+

@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Admin Details</title>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+	<script src="navigation.js"></script>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		.search-container {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 20px;
+			gap: 15px;
+		}
+
+		.date-filter-container {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.date-filter {
+			padding: 10px 14px;
+			border: 1px solid #d1d5db;
+			border-radius: 8px;
+			font-size: 16px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+			transition: all 0.2s ease;
+		}
+
+		.date-filter:focus {
+			outline: none;
+			border-color: #3b82f6;
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+		}
+
+		.member-assignment {
+			background: #f8fafc;
+			border: 1px solid #e5e7eb;
+			border-radius: 8px;
+			padding: 15px;
+			margin-bottom: 20px;
+		}
+
+		.member-day {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 8px 0;
+			border-bottom: 1px solid #e5e7eb;
+		}
+
+		.member-day:last-child {
+			border-bottom: none;
+		}
+
+		.member-info {
+			font-weight: 600;
+			color: #374151;
+		}
+
+		.user-count {
+			background: #3b82f6;
+			color: white;
+			padding: 4px 8px;
+			border-radius: 4px;
+			font-size: 12px;
+		}
+
+		.search-box {
+			padding: 10px 14px;
+			width: 320px;
+			border: 1px solid #d1d5db;
+			border-radius: 8px;
+			font-size: 16px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+			transition: all 0.2s ease;
+		}
+
+		.search-box:focus {
+			outline: none;
+			border-color: #3b82f6;
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+		}
+
+		.add-admin-btn {
+			padding: 10px 20px;
+			background-color: #10b981;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			font-size: 16px;
+			cursor: pointer;
+			transition: background-color 0.2s ease;
+			white-space: nowrap;
+		}
+
+		.add-admin-btn:hover {
+			background-color: #059669;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			background-color: white;
+			margin-bottom: 30px;
+			border-radius: 10px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+			overflow: hidden;
+		}
+
+		th,
+		td {
+			padding: 14px 16px;
+			text-align: left;
+			border-bottom: 1px solid #e5e7eb;
+			vertical-align: middle;
+		}
+
+		th {
+			background-color: #3b82f6;
+			color: white;
+		}
+
+		tr:hover td {
+			background-color: #f1f5f9;
+		}
+
+		.status-btn {
+			padding: 6px 14px;
+			border-radius: 6px;
+			font-weight: 600;
+			font-size: 14px;
+			border: none;
+			cursor: pointer;
+			color: white;
+			min-width: 80px;
+			text-align: center;
+			user-select: none;
+			background-color: #22c55e;
+		}
+
+		/* Modal Styles */
+		.modal-overlay {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			background: rgba(0, 0, 0, 0.5);
+			z-index: 999;
+		}
+
+		.modal-overlay.active {
+			display: block;
+		}
+
+		.status-modal {
+			display: none;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-38%, -45%);
+			background: white;
+			border-radius: 12px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+			z-index: 1000;
+			width: 90%;
+			max-width: 1000px;
+			max-height: 80vh;
+			overflow-y: auto;
+			-ms-overflow-style: none;
+			/* IE/Edge */
+			scrollbar-width: none;
+		}
+
+		.status-modal.active {
+			display: block;
+		}
+
+		.modal-header {
+			background: #3b82f6;
+			color: white;
+			padding: 20px 30px;
+			border-top-left-radius: 12px;
+			border-top-right-radius: 12px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.modal-header h3 {
+			margin: 0;
+			font-size: 20px;
+			font-weight: 600;
+		}
+
+		.close-btn {
+			background: none;
+			border: none;
+			color: white;
+			font-size: 24px;
+			cursor: pointer;
+			padding: 0;
+			width: 30px;
+			height: 30px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.close-btn:hover {
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 50%;
+		}
+
+		.modal-content {
+			padding: 30px;
+		}
+
+		.modal-tabs {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 20px;
+		}
+
+		.modal-tab-btn {
+			padding: 12px 24px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-weight: 600;
+			font-size: 14px;
+			transition: all 0.3s;
+		}
+
+		.modal-tab-btn.active {
+			background-color: #3b82f6;
+			color: white;
+		}
+
+		.modal-tab-btn:not(.active) {
+			background-color: #e5e7eb;
+			color: #4b5563;
+		}
+
+		.modal-tab-btn:not(.active):hover {
+			background-color: #d1d5db;
+		}
+
+		.modal-table {
+			width: 100%;
+			border-collapse: collapse;
+			background-color: white;
+			border-radius: 8px;
+			overflow: hidden;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		}
+
+		.modal-table th,
+		.modal-table td {
+			padding: 12px 16px;
+			text-align: left;
+			border-bottom: 1px solid #e5e7eb;
+		}
+
+		.modal-table th {
+			background-color: #f8fafc;
+			color: #374151;
+			font-weight: 600;
+			font-size: 14px;
+		}
+
+		.modal-table tr:hover td {
+			background-color: #f1f5f9;
+		}
+
+		.view-details-btn {
+			background-color: #3b82f6;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			padding: 6px 12px;
+			font-size: 12px;
+			cursor: pointer;
+			transition: background 0.2s;
+		}
+
+		.view-details-btn:hover {
+			background-color: #2563eb;
+		}
+
+		.no-data {
+			text-align: center;
+			padding: 40px;
+			color: #6b7280;
+			font-style: italic;
+		}
+
+		/* Details Modal Styles */
+		.details-modal {
+			display: none;
+			position: fixed;
+			top: 54%;
+			left: 77%;
+			transform: translate(-50%, -50%);
+			background: #f8fafc;
+			border-radius: 12px;
+			box-shadow: 0 8px 32px rgba(60, 90, 150, 0.18);
+			border: 1px solid #e5e7eb;
+			padding: 0;
+			z-index: 1001;
+			min-width: 370px;
+			max-width: 95vw;
+			max-height: 90vh;
+			overflow-y: auto;
+			-ms-overflow-style: none;
+			/* IE/Edge */
+			scrollbar-width: none;
+		}
+
+		.details-modal.active {
+			display: block;
+		}
+
+		.details-modal .modal-header {
+			background: #3b82f6;
+			color: white;
+			padding: 18px 32px 14px 32px;
+			border-top-left-radius: 12px;
+			border-top-right-radius: 12px;
+			font-size: 18px;
+			font-weight: 600;
+			letter-spacing: 0.5px;
+			position: relative;
+		}
+
+		.details-modal .close-btn {
+			position: absolute;
+			top: 16px;
+			right: 24px;
+			background: none;
+			border: none;
+			font-size: 24px;
+			cursor: pointer;
+			color: white;
+			font-weight: bold;
+		}
+
+		.details-fields {
+			padding: 28px 32px 24px 32px;
+			background: #fff;
+			border-bottom-left-radius: 12px;
+			border-bottom-right-radius: 12px;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 18px 32px;
+		}
+
+		.details-fields div {
+			background: #f1f5f9;
+			border-radius: 6px;
+			padding: 10px 14px;
+			font-size: 16px;
+			box-shadow: 0 1px 2px rgba(60, 90, 150, 0.04);
+			display: flex;
+			flex-direction: column;
+		}
+
+		.details-fields strong {
+			color: #2563eb;
+			font-size: 15px;
+			margin-bottom: 2px;
+			font-weight: 500;
+		}
+
+		/* Chart Container Styles */
+		#chartContainer {
+			background: #f8fafc;
+			border-radius: 8px;
+			padding: 20px;
+			margin-bottom: 20px;
+			border: 1px solid #e5e7eb;
+		}
+
+		#statusPieChart {
+			border-radius: 8px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		}
+
+		/* Status Badge Styles */
+		.status-badge {
+			padding: 4px 8px;
+			border-radius: 4px;
+			font-size: 12px;
+			font-weight: 600;
+			text-align: center;
+			display: inline-block;
+			min-width: 80px;
+		}
+
+		.status-progress {
+			background: #f59e0b;
+			color: white;
+		}
+
+		.status-recruited {
+			background: #10b981;
+			color: white;
+		}
+
+		.status-rejected {
+			background: #ef4444;
+			color: white;
+		}
+
+		/* Recruits Count Styles */
+		.recruits-count {
+			background: #10b981 !important;
+			color: white !important;
+			padding: 4px 8px !important;
+			border-radius: 4px !important;
+			font-size: 12px !important;
+			font-weight: 600 !important;
+			display: inline-block;
+			min-width: 30px;
+			text-align: center;
+			transition: all 0.3s ease;
+		}
+
+		/* Top performer highlighting */
+		.top-performer {
+			background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+			color: #1f2937 !important;
+			box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+			animation: pulse 2s infinite;
+		}
+
+		.second-performer {
+			background: linear-gradient(135deg, #c0c0c0, #e5e5e5) !important;
+			color: #1f2937 !important;
+		}
+
+		.third-performer {
+			background: linear-gradient(135deg, #cd7f32, #daa520) !important;
+			color: white !important;
+		}
+
+		@keyframes pulse {
+			0% {
+				transform: scale(1);
+			}
+
+			50% {
+				transform: scale(1.05);
+			}
+
+			100% {
+				transform: scale(1);
+			}
+		}
+
+		/* Table row highlighting for top performers */
+		.top-performer-row {
+			background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+			border-left: 4px solid #fbbf24;
+		}
+
+		.second-performer-row {
+			background: linear-gradient(135deg, #f3f4f6, #e5e7eb) !important;
+			border-left: 4px solid #9ca3af;
+		}
+
+		.third-performer-row {
+			background: linear-gradient(135deg, #fef2e2, #fed7aa) !important;
+			border-left: 4px solid #f59e0b;
+		}
+
+		/* Add Admin Modal Styles */
+		.add-admin-modal {
+			display: none;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: #f8fafc;
+			border-radius: 12px;
+			box-shadow: 0 8px 32px rgba(60, 90, 150, 0.18);
+			border: 1px solid #e5e7eb;
+			padding: 0;
+			z-index: 1001;
+			min-width: 370px;
+			max-width: 500px;
+			max-height: 90vh;
+			overflow-y: auto;
+		}
+
+		.add-admin-modal.active {
+			display: block;
+		}
+
+		.add-admin-modal .modal-header {
+			background: #3b82f6;
+			color: white;
+			padding: 18px 32px 14px 32px;
+			border-top-left-radius: 12px;
+			border-top-right-radius: 12px;
+			font-size: 18px;
+			font-weight: 600;
+			letter-spacing: 0.5px;
+			position: relative;
+		}
+
+		.add-admin-modal .modal-content {
+			padding: 20px 32px;
+			background: #fff;
+			border-bottom-left-radius: 12px;
+			border-bottom-right-radius: 12px;
+		}
+
+		.add-admin-form {
+			display: flex;
+			flex-direction: column;
+			gap: 15px;
+		}
+
+		.add-admin-form label {
+			font-weight: 600;
+			color: #374151;
+			margin-bottom: 5px;
+		}
+
+		.add-admin-form input {
+			padding: 10px 14px;
+			border: 1px solid #d1d5db;
+			border-radius: 8px;
+			font-size: 16px;
+			width: 100%;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+			transition: all 0.2s ease;
+		}
+
+		.add-admin-form input:focus {
+			outline: none;
+			border-color: #3b82f6;
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+		}
+
+		.add-admin-form input.invalid {
+			border-color: #ef4444;
+			background-color: #fef2f2;
+		}
+
+		.add-admin-form .error-message {
+			color: #ef4444;
+			font-size: 12px;
+			margin-top: 4px;
+			display: none;
+		}
+
+		.add-admin-form input.invalid+.error-message {
+			display: block;
+		}
+
+		.form-buttons {
+			display: flex;
+			gap: 10px;
+			justify-content: flex-end;
+			margin-top: 20px;
+		}
+
+		.save-btn {
+			padding: 10px 20px;
+			background-color: #10b981;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			font-size: 16px;
+			cursor: pointer;
+			transition: background-color 0.2s ease;
+		}
+
+		.save-btn:hover {
+			background-color: #059669;
+		}
+
+		.cancel-btn {
+			padding: 10px 20px;
+			background-color: #6b7280;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			font-size: 16px;
+			cursor: pointer;
+			transition: background-color 0.2s ease;
+		}
+
+		.cancel-btn:hover {
+			background-color: #4b5563;
+		}
+
+		/* Responsive Design */
+		@media (max-width: 768px) {
+			.search-container {
+				flex-direction: column;
+				align-items: stretch;
+				gap: 10px;
+			}
+
+			.search-container>div {
+				width: 100%;
+			}
+
+			.search-box {
+				width: 100%;
+				margin-bottom: 10px;
+			}
+
+			.add-admin-btn {
+				margin-left: 0;
+				width: 100%;
+			}
+
+			.date-filter-container {
+				flex-direction: column;
+				align-items: stretch;
+				gap: 8px;
+			}
+
+			.date-filter {
+				width: 100%;
+			}
+
+			.member-assignment {
+				padding: 10px;
+			}
+
+			.member-day {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 8px;
+			}
+
+			.modal-content .date-filter-container {
+				flex-direction: column;
+				align-items: stretch;
+				gap: 8px;
+			}
+
+			.modal-content .date-filter {
+				width: 100%;
+			}
+
+			.status-modal {
+				width: 95%;
+				max-height: 85vh;
+			}
+
+			.modal-content {
+				padding: 20px;
+			}
+
+			.modal-tabs {
+				flex-wrap: wrap;
+				gap: 5px;
+			}
+
+			.modal-tab-btn {
+				flex: 1;
+				min-width: 100px;
+			}
+
+			.modal-table th,
+			.modal-table td {
+				padding: 8px 6px;
+				font-size: 13px;
+			}
+
+			.details-fields {
+				grid-template-columns: 1fr;
+				gap: 12px;
+				padding: 20px;
+			}
+
+			table {
+				font-size: 14px;
+			}
+
+			th,
+			td {
+				padding: 10px 8px;
+			}
+
+			#chartContainer {
+				padding: 15px;
+			}
+
+			#statusPieChart {
+				max-width: 350px;
+				max-height: 220px;
+			}
+
+			.add-admin-modal {
+				width: 95%;
+			}
+
+			.add-admin-form input {
+				font-size: 14px;
+			}
+		}
+
+		@media (max-width: 480px) {
+			.modal-header h3 {
+				font-size: 16px;
+			}
+
+			.modal-table th,
+			.modal-table td {
+				padding: 6px 4px;
+				font-size: 11px;
+			}
+
+			.view-details-btn {
+				padding: 4px 6px;
+				font-size: 10px;
+			}
+
+			.modal-tabs {
+				flex-direction: column;
+			}
+
+			.modal-tab-btn {
+				width: 100%;
+				margin-bottom: 5px;
+			}
+
+			#statusPieChart {
+				max-width: 300px;
+				max-height: 200px;
+			}
+
+			.add-admin-modal {
+				min-width: 300px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="main">
+		<div class="search-container">
+			<div style="display: flex; gap: 15px; align-items: center;">
+				<input type="text" id="searchInput" placeholder="Search by name or email or phone"
+					onkeyup="filterAdmins()" class="search-box" />
+				<button class="add-admin-btn" onclick="openAddAdminModal()">
+					<i class="fas fa-plus"></i> Add Admin
+				</button>
+			</div>
+			<div class="date-filter-container">
+				<label for="dateFilter" style="font-weight: 600; color: #374151;">Filter by Date:</label>
+				<input type="date" id="dateFilter" class="date-filter" onchange="filterByDate()"
+					title="Select a date to filter recruits count for that specific day" />
+				<button onclick="clearDateFilter()"
+					style="padding: 8px 12px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer;"
+					title="Clear date filter to show all recruits">Clear</button>
+			</div>
+		</div>
+
+		<div id="adminList">
+			<table>
+				<thead>
+					<tr>
+						<th>S.No</th>
+						<th>Admin Id</th>
+						<th>Name</th>
+						<th>Designation</th>
+						<th>Recruits <i class="fas fa-sort-down" style="font-size: 12px; color: #10b981;"
+								title="Sorted by highest recruits first"></i></th>
+						<th>Email</th>
+						<th>Address</th>
+						<th>Phone</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody id="adminTable"></tbody>
+			</table>
+		</div>
+	</div>
+
+	<!-- Status Modal -->
+	<div class="modal-overlay" id="modalOverlay" onclick="closeStatusModal()"></div>
+	<div class="status-modal" id="statusModal">
+		<div class="modal-header">
+			<h3 id="modalTitle">Admin Status - Users Assigned</h3>
+			<button class="close-btn" onclick="closeStatusModal()">&times;</button>
+		</div>
+		<div class="modal-content">
+			<div class="modal-tabs">
+				<button class="modal-tab-btn active" onclick="showModalTab('assigned')">Assigned</button>
+				<button class="modal-tab-btn" onclick="showModalTab('recruited')">Recruited</button>
+				<button class="modal-tab-btn" onclick="showModalTab('fileClosed')">File Closed</button>
+			</div>
+
+			<!-- Date Filter inside Modal -->
+			<div class="date-filter-container" style="margin-bottom: 20px; justify-content: flex-end;">
+				<label for="modalDateFilter" style="font-weight: 600; color: #374151;">Filter by Date:</label>
+				<input type="date" id="modalDateFilter" class="date-filter" onchange="filterModalByDate()" />
+				<button onclick="clearModalDateFilter()"
+					style="padding: 8px 12px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+			</div>
+
+			<!-- Pie Chart Container -->
+			<div id="chartContainer" style="margin-bottom: 20px; text-align: center;">
+				<canvas id="statusPieChart" width="400" height="250"
+					style="max-width: 400px; max-height: 250px;"></canvas>
+			</div>
+
+			<div id="assignedContent">
+				<table class="modal-table" id="assignedModalTable">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Name</th>
+							<th>Email</th>
+							<th>Status</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody id="assignedModalTableBody"></tbody>
+				</table>
+			</div>
+
+			<div id="recruitedContent" style="display: none;">
+				<table class="modal-table" id="recruitedModalTable">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Name</th>
+							<th>Email</th>
+							<th>Status</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody id="recruitedModalTableBody"></tbody>
+				</table>
+			</div>
+
+			<div id="closedContent" style="display: none;">
+				<table class="modal-table" id="closedModalTable">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Name</th>
+							<th>Email</th>
+							<th>Status</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody id="closedModalTableBody"></tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- Details Modal -->
+	<div class="details-modal" id="detailsModal">
+		<div class="modal-header">
+			Resume Details
+			<button class="close-btn" onclick="closeDetailsModal()">&times;</button>
+		</div>
+		<div class="details-fields" id="detailsFields"></div>
+	</div>
+
+	<!-- Add Admin Modal -->
+	<div class="modal-overlay" id="addAdminModalOverlay" onclick="closeAddAdminModal()"></div>
+	<div class="add-admin-modal" id="addAdminModal">
+		<div class="modal-header">
+			Add New Admin
+			<button class="close-btn" onclick="closeAddAdminModal()">&times;</button>
+		</div>
+		<div class="modal-content">
+			<div class="add-admin-form">
+				<div>
+					<label for="adminName">Name:</label>
+					<input type="text" id="adminName" placeholder="Enter name" required>
+					<span class="error-message" id="adminNameError">Name must contain only letters and spaces, 2-50
+						characters</span>
+				</div>
+				<div>
+					<label for="adminDesignation">Designation:</label>
+					<input type="text" id="adminDesignation" placeholder="Enter designation" required>
+					<span class="error-message" id="adminDesignationError">Designation must be 2-50 characters</span>
+				</div>
+				<div>
+					<label for="adminEmail">Email:</label>
+					<input type="email" id="adminEmail" placeholder="Enter email" required>
+					<span class="error-message" id="adminEmailError">Please enter a valid email address</span>
+				</div>
+				<div>
+					<label for="adminAddress">Address:</label>
+					<input type="text" id="adminAddress" placeholder="Enter address" required>
+					<span class="error-message" id="adminAddressError">Address must be 5-100 characters</span>
+				</div>
+				<div>
+					<label for="adminPhone">Phone:</label>
+					<input type="tel" id="adminPhone" placeholder="Enter phone number" required>
+					<span class="error-message" id="adminPhoneError">Please enter a valid 10-digit phone number</span>
+				</div>
+				<div>
+					<label for="adminPassword">Password:</label>
+					<input type="password" id="adminPassword" placeholder="Enter password" required>
+					<span class="error-message" id="adminPasswordError">Password must be 8-20 characters, including at
+						least one letter, one number, and one special character</span>
+				</div>
+				<div class="form-buttons">
+					<button class="cancel-btn" onclick="closeAddAdminModal()">Cancel</button>
+					<button class="save-btn" onclick="saveAdmin()">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			const managerEmail = localStorage.getItem("managerEmail");
+			if (!managerEmail) {
+				alert("Login required");
+				window.location.href = "/api/manager/loginform";
+				return;
+			}
+			fetchAdmins();
+		});
+		function filterAdmins() {
+			const searchTerm = document.getElementById("searchInput").value.trim().toLowerCase();
+			populateAdmins(searchTerm);
+		}
+
+		//Stores Admins Data 
+		let admins = [];
+		let currentAdminId = null;
+
+
+
+		// Fetch admins from backend
+		async function fetchAdmins(selectedDate = "") {
+			try {
+				const managerEmail = localStorage.getItem("managerEmail");
+				let url = `/api/manager/admins?managerEmail=${encodeURIComponent(managerEmail)}`;
+				if (selectedDate) {
+					url += `&date=${selectedDate}`;
+				}
+
+				const response = await fetch(url);
+				if (!response.ok) throw new Error("Failed to fetch admins");
+
+				// Assign to global admins
+				admins = await response.json();
+
+				// Sort admins by recruits count (DESC)
+				admins.sort((a, b) => b.recruitsCount - a.recruitsCount);
+
+				// Populate UI
+				populateAdmins();
+
+			} catch (error) {
+				console.error("Error fetching admins:", error);
+				document.getElementById("adminTable").innerHTML =
+					`<tr><td colspan="8" style="text-align:center;">Failed to load admins.</td></tr>`;
+			}
+		}
+
+		/// Populate the table with admins and optional search filter
+		function populateAdmins(filter = "") {
+			const table = document.getElementById("adminTable");
+			table.innerHTML = "";
+
+			const filteredAdmins = admins.filter(admin => {
+				return (admin.name && admin.name.toLowerCase().includes(filter.toLowerCase())) ||
+					(admin.email && admin.email.toLowerCase().includes(filter.toLowerCase())) ||
+					(admin.phone && admin.phone.toString().includes(filter));
+			});
+
+			if (filteredAdmins.length === 0) {
+				table.innerHTML = `<tr><td colspan="8" style="text-align:center;">No admins found.</td></tr>`;
+				return;
+			}
+
+			// Already sorted in fetchAdmins(), so just render
+			filteredAdmins.forEach((admin, index) => {
+				let recruitsClass = "recruits-count";
+				let rowClass = "";
+
+				if (admin.recruitsCount > 0) {
+					if (index === 0) {
+						recruitsClass += " top-performer";
+						rowClass = "top-performer-row";
+					} else if (index === 1) {
+						recruitsClass += " second-performer";
+						rowClass = "second-performer-row";
+					} else if (index === 2) {
+						recruitsClass += " third-performer";
+						rowClass = "third-performer-row";
+					}
+				}
+
+				table.innerHTML += `
+	      <tr class="${rowClass}">
+	        <td>${index + 1}</td>
+	        <td>${admin.id}</td>
+	        <td>${admin.name}</td>
+	        <td>${admin.designation}</td>
+	        <td><span class="${recruitsClass}" title="Number of recruited candidates">${admin.recruitsCount}</span></td>
+	        <td>${admin.email}</td>
+	        <td>${admin.address}</td>
+	        <td>${admin.phone}</td>
+	        <td>
+	          <button class="status-btn" onclick="openAdminTracking('${admin.id}')">
+	            Status
+	          </button>
+	        </td>
+	      </tr>
+	    `;
+			});
+
+			if (table.innerHTML.trim() === "") {
+				table.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px;">No admins found.</td></tr>`;
+			}
+		}
+		let currentTab = "assigned";
+		function openAdminTracking(adminId) {
+			showStatusModal(adminId);
+		}
+
+		function showStatusModal(adminId) {
+			const modal = document.getElementById("statusModal");
+			const overlay = document.getElementById("modalOverlay");
+			const modalTitle = document.getElementById("modalTitle");
+			modalTitle.textContent = `Admin Status - ${adminId}`;
+
+			currentAdminId = adminId;
+			// Reset modal contents
+			document.getElementById("assignedModalTableBody").innerHTML = "";
+			document.getElementById("recruitedModalTableBody").innerHTML = "";
+			document.getElementById("closedModalTableBody").innerHTML = "";
+
+			// Clear old chart
+			const canvas = document.getElementById("statusPieChart");
+			const ctx = canvas.getContext("2d");
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			// Reset modal date filter
+			const modalDateFilter = document.getElementById("modalDateFilter");
+			if (modalDateFilter) {
+				modalDateFilter.value = "";
+			}
+
+			// Load data for default tab
+			populateModalTables(adminId);
+
+			modal.classList.add("active");
+			overlay.classList.add("active");
+		}
+
+		function closeStatusModal() {
+			document.getElementById("modalDateFilter").value = "";
+			const modal = document.getElementById("statusModal");
+			const overlay = document.getElementById("modalOverlay");
+
+			modal.classList.remove("active");
+			overlay.classList.remove("active");
+		}
+
+		function filterByDate() {
+			const selectedDate = document.getElementById("dateFilter").value;
+			fetchAdmins(selectedDate);
+
+			const modal = document.getElementById("statusModal");
+			if (modal.classList.contains("active")) {
+				const modalTitle = document.getElementById("modalTitle").textContent;
+				const adminName = modalTitle.replace("Admin Status - ", "");
+				populateModalTables(adminName);
+			}
+		}
+
+		function clearDateFilter() {
+			document.getElementById("dateFilter").value = "";
+			filterByDate();
+		}
+
+		function filterModalByDate() {
+			const modal = document.getElementById("statusModal");
+			if (modal.classList.contains("active")) {
+				const modalTitle = document.getElementById("modalTitle").textContent;
+				const adminName = modalTitle.replace("Admin Status - ", "");
+				populateModalTables(currentAdminId);
+			}
+		}
+
+		function clearModalDateFilter() {
+			document.getElementById("modalDateFilter").value = "";
+			filterModalByDate();
+		}
+
+		async function populateModalTables(adminId) {
+			const assignedTableBody = document.getElementById("assignedModalTableBody");
+			const recruitedTableBody = document.getElementById("recruitedModalTableBody");
+			const closedTableBody = document.getElementById("closedModalTableBody");
+
+			assignedTableBody.innerHTML = "";
+			recruitedTableBody.innerHTML = "";
+			closedTableBody.innerHTML = "";
+
+			try {
+				// Add tab param ✅
+				const modalDateFilter = document.getElementById("modalDateFilter");
+				let url = `/api/manager/admin/${encodeURIComponent(adminId)}/users?tab=${encodeURIComponent(currentTab)}`;
+
+				if (modalDateFilter && modalDateFilter.value) {
+					url += `&date=${encodeURIComponent(modalDateFilter.value)}`;
+				}
+
+				const response = await fetch(url);
+
+				if (response.status === 404) {
+					console.log("No users found for this admin");
+					return [];
+				}
+				if (!response.ok) {
+					throw new Error(`Failed to fetch users: ${response.status}`);
+				}
+
+				const adminResumes = await response.json();
+				let assignedCount = 0, recruitedCount = 0, rejectedCount = 0;
+
+				adminResumes.forEach(resume => {
+					const status = resume.finalStatus || "In Progress";
+					const statusBadge = getStatusBadge(status);
+
+					const row = `
+		                <tr>
+		                    <td>${resume.id || "N/A"}</td>
+		                    <td>${resume.name || "N/A"}</td>
+		                    <td>${resume.email || "N/A"}</td>
+		                    <td>${statusBadge}</td>
+		                    <td>
+		                        <button class="view-details-btn" onclick="showResumeDetails(${resume.id})">
+		                            View Details
+		                        </button>
+		                    </td>
+		                </tr>
+		            `;
+
+					if (status === "Recruited") {
+						recruitedTableBody.innerHTML += row;
+						closedTableBody.innerHTML += row; // ✅ keep recruited inside closed
+						recruitedCount++;
+					} else if (status === "Rejected") {
+						closedTableBody.innerHTML += row;
+						rejectedCount++;
+					} else {
+						assignedTableBody.innerHTML += row;
+						assignedCount++;
+					}
+				});
+
+				if (assignedTableBody.innerHTML.trim() === "")
+					assignedTableBody.innerHTML = '<tr><td colspan="5" class="no-data">No assigned resumes found</td></tr>';
+				if (recruitedTableBody.innerHTML.trim() === "")
+					recruitedTableBody.innerHTML = '<tr><td colspan="5" class="no-data">No recruited candidates found</td></tr>';
+				if (closedTableBody.innerHTML.trim() === "")
+					closedTableBody.innerHTML = '<tr><td colspan="5" class="no-data">No closed files found</td></tr>';
+
+				createPieChart(assignedCount, recruitedCount, rejectedCount);
+
+			} catch (error) {
+				console.error("Error loading resumes:", error);
+				const errorRow = '<tr><td colspan="5" class="no-data">Error loading data</td></tr>';
+				assignedTableBody.innerHTML = errorRow;
+				recruitedTableBody.innerHTML = errorRow;
+				closedTableBody.innerHTML = errorRow;
+			}
+		}
+
+		function getStatusBadge(status) {
+			const badges = {
+				"In Progress": '<span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">In Progress</span>',
+				"Recruited": '<span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Recruited</span>',
+				"Rejected": '<span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Rejected</span>'
+			};
+			return badges[status] || badges["In Progress"];
+		}
+
+		function createPieChart(assigned, recruited, rejected) {
+			const canvas = document.getElementById("statusPieChart");
+			const ctx = canvas.getContext("2d");
+
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			const total = assigned + recruited + rejected;
+			if (total === 0) return;
+
+			const centerX = 120;
+			const centerY = canvas.height / 2;
+			const radius = 80;
+
+			const colors = {
+				assigned: "#f59e0b",
+				recruited: "#10b981",
+				rejected: "#ef4444"
+			};
+
+			let currentAngle = -Math.PI / 2;
+
+			if (assigned > 0) {
+				const assignedAngle = (assigned / total) * 2 * Math.PI;
+				drawPieSegment(ctx, centerX, centerY, radius, currentAngle, currentAngle + assignedAngle, colors.assigned);
+				drawPercentageLabel(ctx, centerX, centerY, radius * 0.7, currentAngle + assignedAngle / 2, assigned, total);
+				currentAngle += assignedAngle;
+			}
+
+			if (recruited > 0) {
+				const recruitedAngle = (recruited / total) * 2 * Math.PI;
+				drawPieSegment(ctx, centerX, centerY, radius, currentAngle, currentAngle + recruitedAngle, colors.recruited);
+				drawPercentageLabel(ctx, centerX, centerY, radius * 0.7, currentAngle + recruitedAngle / 2, recruited, total);
+				currentAngle += recruitedAngle;
+			}
+
+			if (rejected > 0) {
+				const rejectedAngle = (rejected / total) * 2 * Math.PI;
+				drawPieSegment(ctx, centerX, centerY, radius, currentAngle, currentAngle + rejectedAngle, colors.rejected);
+				drawPercentageLabel(ctx, centerX, centerY, radius * 0.7, currentAngle + rejectedAngle / 2, rejected, total);
+			}
+
+			drawLegend(ctx, assigned, recruited, rejected, colors);
+		}
+
+		function drawPieSegment(ctx, centerX, centerY, radius, startAngle, endAngle, color) {
+			ctx.beginPath();
+			ctx.moveTo(centerX, centerY);
+			ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+			ctx.closePath();
+			ctx.fillStyle = color;
+			ctx.fill();
+			ctx.strokeStyle = "#fff";
+			ctx.lineWidth = 2;
+			ctx.stroke();
+		}
+
+		function drawPercentageLabel(ctx, centerX, centerY, labelRadius, angle, value, total) {
+			const percentage = Math.round((value / total) * 100);
+			if (percentage < 5) return;
+
+			const x = centerX + labelRadius * Math.cos(angle);
+			const y = centerY + labelRadius * Math.sin(angle);
+
+			ctx.fillStyle = "#fff";
+			ctx.font = "bold 12px Arial";
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+
+			ctx.beginPath();
+			ctx.arc(x, y, 15, 0, 2 * Math.PI);
+			ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+			ctx.fill();
+
+			ctx.fillStyle = "#fff";
+			ctx.fillText(`${percentage}%`, x, y);
+		}
+
+		function drawLegend(ctx, assigned, recruited, rejected, colors) {
+			const canvas = ctx.canvas;
+			const isSmallScreen = canvas.width < 350;
+
+			const legendY = isSmallScreen ? 20 : 20;
+			const legendX = isSmallScreen ? 220 : 240;
+			const fontSize = isSmallScreen ? 10 : 12;
+			const titleSize = isSmallScreen ? 12 : 14;
+
+			ctx.font = `${fontSize}px Arial`;
+			ctx.textAlign = "left";
+
+			ctx.fillStyle = "#000";
+			ctx.font = `bold ${titleSize}px Arial`;
+			ctx.fillText("Status Distribution", legendX, legendY);
+
+			ctx.font = `${fontSize}px Arial`;
+
+			ctx.fillStyle = colors.assigned;
+			ctx.fillRect(legendX, legendY + 15, 10, 10);
+			ctx.fillStyle = "#000";
+			ctx.fillText(`In Progress: ${assigned}`, legendX + 15, legendY + 24);
+
+			ctx.fillStyle = colors.recruited;
+			ctx.fillRect(legendX, legendY + 32, 10, 10);
+			ctx.fillStyle = "#000";
+			ctx.fillText(`Recruited: ${recruited}`, legendX + 15, legendY + 41);
+
+			ctx.fillStyle = colors.rejected;
+			ctx.fillRect(legendX, legendY + 49, 10, 10);
+			ctx.fillStyle = "#000";
+			ctx.fillText(`Rejected: ${rejected}`, legendX + 15, legendY + 58);
+
+			const fileClosed = recruited + rejected;
+			ctx.fillStyle = "#666";
+			ctx.font = `${fontSize - 1}px Arial`;
+			ctx.fillText(`File Closed: ${fileClosed}`, legendX, legendY + 75);
+			ctx.fillText(`(Recruited + Rejected)`, legendX, legendY + 88);
+		}
+
+		function showModalTab(tab) {
+			const assignedContent = document.getElementById("assignedContent");
+			const recruitedContent = document.getElementById("recruitedContent");
+			const closedContent = document.getElementById("closedContent");
+			const tabButtons = document.querySelectorAll(".modal-tab-btn");
+
+			currentTab = tab;
+
+			tabButtons.forEach(btn => btn.classList.remove("active"));
+
+			assignedContent.style.display = "none";
+			recruitedContent.style.display = "none";
+			closedContent.style.display = "none";
+
+			if (tab === "assigned") {
+				assignedContent.style.display = "block";
+				tabButtons[0].classList.add("active");
+			} else if (tab === "recruited") {
+				recruitedContent.style.display = "block";
+				tabButtons[1].classList.add("active");
+			} else if (tab === "fileClosed") {
+				closedContent.style.display = "block";
+				tabButtons[2].classList.add("active");
+			}
+
+			populateModalTables(currentAdminId);
+		}
+
+		async function showResumeDetails(resumeId) {
+			try {
+				const response = await fetch(`/api/manager/user/${resumeId}`);
+
+				if (response.status === 404) {
+					alert("User not found");
+					return;
+				}
+
+				if (!response.ok) throw new Error("Failed to fetch user details");
+
+				const resume = await response.json();
+				console.log(resume)
+
+				const detailsModal = document.getElementById("detailsModal");
+				const detailsFields = document.getElementById("detailsFields");
+
+				const fieldsToShow = [
+					"callStatus",
+					"answeredCall",
+					"lookingForJob",
+					"eligibleForClient",
+					"telephoneInterview",
+					"hrInterview",
+					"operationRound",
+					"versantVoice",
+					"documentation",
+					"offerLetter",
+					"joining"
+				];
+
+				detailsFields.innerHTML = fieldsToShow.map(field => {
+					const displayName = field.replace(/([A-Z])/g, ' $1')
+						.replace(/^./, s => s.toUpperCase());
+					return `
+          <div>
+            <strong>${displayName}:</strong>
+            <span>${resume[field] || "N/A"}</span>
+          </div>
+        `;
+				}).join("");
+
+				detailsModal.classList.add("active");
+			} catch (err) {
+				console.error("Error loading resume details:", err);
+				alert("Error loading resume details");
+			}
+
+		}
+
+		function closeDetailsModal() {
+			const detailsModal = document.getElementById("detailsModal");
+			detailsModal.classList.remove("active");
+		}
+
+		function openAddAdminModal() {
+			const modal = document.getElementById("addAdminModal");
+			const overlay = document.getElementById("addAdminModalOverlay");
+			modal.classList.add("active");
+			overlay.classList.add("active");
+
+			// Clear form fields and reset validation states
+			const fields = ["adminName", "adminDesignation", "adminEmail", "adminAddress", "adminPhone", "adminPassword"];
+			fields.forEach(field => {
+				const input = document.getElementById(field);
+				input.value = "";
+				input.classList.remove("invalid");
+				document.getElementById(`${field}Error`).style.display = "none";
+			});
+		}
+
+		function closeAddAdminModal() {
+			const modal = document.getElementById("addAdminModal");
+			const overlay = document.getElementById("addAdminModalOverlay");
+			modal.classList.remove("active");
+			overlay.classList.remove("active");
+		}
+
+		function validateAdminForm() {
+			let isValid = true;
+
+			// Name validation: 2-50 characters, letters and spaces only
+			const nameInput = document.getElementById("adminName");
+			const name = nameInput.value.trim();
+			const nameRegex = /^[a-zA-Z\s]{2,50}$/;
+			if (!nameRegex.test(name)) {
+				nameInput.classList.add("invalid");
+				document.getElementById("adminNameError").style.display = "block";
+				isValid = false;
+			} else {
+				nameInput.classList.remove("invalid");
+				document.getElementById("adminNameError").style.display = "none";
+			}
+
+			// Designation validation: 2-50 characters
+			const designationInput = document.getElementById("adminDesignation");
+			const designation = designationInput.value.trim();
+			if (designation.length < 2 || designation.length > 50) {
+				designationInput.classList.add("invalid");
+				document.getElementById("adminDesignationError").style.display = "block";
+				isValid = false;
+			} else {
+				designationInput.classList.remove("invalid");
+				document.getElementById("adminDesignationError").style.display = "none";
+			}
+
+			// Email validation
+			const emailInput = document.getElementById("adminEmail");
+			const email = emailInput.value.trim();
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(email)) {
+				emailInput.classList.add("invalid");
+				document.getElementById("adminEmailError").style.display = "block";
+				isValid = false;
+			} else if (admins.some(admin => admin.email.toLowerCase() === email.toLowerCase())) {
+				emailInput.classList.add("invalid");
+				document.getElementById("adminEmailError").textContent = "Email already exists";
+				document.getElementById("adminEmailError").style.display = "block";
+				isValid = false;
+			} else {
+				emailInput.classList.remove("invalid");
+				document.getElementById("adminEmailError").textContent = "Please enter a valid email address";
+				document.getElementById("adminEmailError").style.display = "none";
+			}
+
+			// Address validation: 5-100 characters
+			const addressInput = document.getElementById("adminAddress");
+			const address = addressInput.value.trim();
+			if (address.length < 5 || address.length > 100) {
+				addressInput.classList.add("invalid");
+				document.getElementById("adminAddressError").style.display = "block";
+				isValid = false;
+			} else {
+				addressInput.classList.remove("invalid");
+				document.getElementById("adminAddressError").style.display = "none";
+			}
+
+			// Phone validation: 10 digits
+			const phoneInput = document.getElementById("adminPhone");
+			const phone = phoneInput.value.trim();
+			const phoneRegex = /^\d{10}$/;
+			if (!phoneRegex.test(phone)) {
+				phoneInput.classList.add("invalid");
+				document.getElementById("adminPhoneError").style.display = "block";
+				isValid = false;
+			} else if (admins.some(admin => admin.phone === phone)) {
+				phoneInput.classList.add("invalid");
+				document.getElementById("adminPhoneError").textContent = "Phone number already exists";
+				document.getElementById("adminPhoneError").style.display = "block";
+				isValid = false;
+			} else {
+				phoneInput.classList.remove("invalid");
+				document.getElementById("adminPhoneError").textContent = "Please enter a valid 10-digit phone number";
+				document.getElementById("adminPhoneError").style.display = "none";
+			}
+
+			// Password validation: 8-20 characters, at least one letter, one number, one special character
+			const passwordInput = document.getElementById("adminPassword");
+			const password = passwordInput.value.trim();
+			const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*])[a-zA-Z\d!@#$%^&*]{8,20}$/;
+			if (!passwordRegex.test(password)) {
+				passwordInput.classList.add("invalid");
+				document.getElementById("adminPasswordError").style.display = "block";
+				isValid = false;
+			} else {
+				passwordInput.classList.remove("invalid");
+				document.getElementById("adminPasswordError").style.display = "none";
+			}
+
+			return isValid;
+		}
+
+		async function saveAdmin() {
+			if (!validateAdminForm()) {
+				return;
+			}
+
+			const name = document.getElementById("adminName").value.trim();
+			const designation = document.getElementById("adminDesignation").value.trim();
+			const email = document.getElementById("adminEmail").value.trim();
+			const address = document.getElementById("adminAddress").value.trim();
+			const phone = document.getElementById("adminPhone").value.trim();
+			const password = document.getElementById("adminPassword").value.trim();
+			const managerMail = localStorage.getItem("managerEmail");
+
+			const adminDto = {
+				name,
+				designation,
+				email,
+				address,
+				phone,
+				password,
+				managerMail
+			};
+
+			try {
+				const response = await fetch("/api/manager/saveadmin", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(adminDto)
+				});
+
+				if (!response.ok) throw new Error(`HTTP status ${response.status}`);
+
+				const result = await response.text();
+
+				await fetchAdmins(); // fetch latest from backend
+
+				closeAddAdminModal();
+			} catch (err) {
+				console.error("Error saving admin:", err);
+				alert("❌ Failed to save admin. Check console.");
+			}
+		}
+		populateAdmins();
+	</script>
+</body>
+
+</html>

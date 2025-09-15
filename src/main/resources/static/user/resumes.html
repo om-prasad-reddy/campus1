@@ -1,0 +1,2858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder - Campus1</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- html2canvas for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* Main content area adjustments for sidebar and header */
+        .main-content {
+            transition: margin-left 0.3s ease-in-out;
+            margin-left: 16rem; /* Default expanded sidebar width */
+            margin-top: 80px; /* Account for fixed header */
+            min-height: calc(100vh - 80px);
+            background-color: #f8fafc;
+            width: calc(100% - 16rem);
+        }
+       
+        .main-content.sidebar-collapsed {
+            margin-left: 4rem; /* Collapsed sidebar width */
+            width: calc(100% - 4rem);
+        }
+       
+        /* Responsive breakpoints for different screen sizes */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .main-content {
+                margin-left: 4rem !important; /* Always collapsed on laptop */
+                width: calc(100% - 4rem) !important;
+            }
+        }
+       
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+                margin-top: 64px; /* Account for mobile header height */
+            }
+        }
+        
+        /* Resume Template Styles */
+        .resume-template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+       
+        .resume-template {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+       
+        .resume-template:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+            transform: translateY(-3px);
+        }
+       
+        .resume-template.selected {
+            border-color: #10b981;
+            background: #f0fdf4;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
+        }
+       
+        .resume-template h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+       
+        .resume-template p {
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+       
+        .resume-preview {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            min-height: 200px;
+            max-height: 300px;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+        
+        /* Template card styles */
+        .template-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+       
+        .template-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+       
+        .template-card.selected {
+            border-color: #10b981 !important;
+            background-color: #f0fdf4;
+        }
+       
+        /* Template action buttons */
+        .template-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            justify-content: center;
+        }
+       
+        .template-action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+       
+        .template-action-btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            transform: translateY(-1px);
+        }
+       
+        .template-action-btn.preview-btn {
+            color: #3b82f6;
+        }
+       
+        .template-action-btn.preview-btn:hover {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+       
+        .template-action-btn.download-btn {
+            color: #10b981;
+        }
+       
+        .template-action-btn.download-btn:hover {
+            background: #f0fdf4;
+            border-color: #10b981;
+        }
+       
+        .template-action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+       
+        .template-action-btn:disabled:hover {
+            transform: none;
+            background: white;
+            border-color: #e5e7eb;
+        }
+        
+        /* PDF generation styles */
+        .pdf-content {
+            background: white;
+            color: #000;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        /* Enhanced PDF container styling */
+        #pdf-temp-container {
+            position: absolute;
+            left: -9999px;
+            width: 210mm;
+            background: white;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+            box-shadow: none;
+            border: none;
+        }
+        
+        /* Loading spinner animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        /* Error message styling */
+        .error-message {
+            background-color: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #c33;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        /* Library status indicator */
+        .library-status {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+        }
+        
+        /* Enhanced resume content styles for better rendering */
+        .pdf-content * {
+            box-sizing: border-box;
+        }
+        
+        .pdf-content img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Ensure proper text wrapping */
+        .pdf-content p, .pdf-content div {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        /* Print-specific styles */
+        @media print {
+            .pdf-content {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+        
+        .hide-scrollbar {
+            overflow-y: auto;
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none; /* Chrome, Safari */
+        }
+        
+        /* Logout confirmation modal styles */
+        .logout-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .logout-modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .logout-modal-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #fee2e2;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 16px;
+        }
+        
+        .logout-modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .logout-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .logout-btn-cancel {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+        }
+        
+        .logout-btn-cancel:hover {
+            background-color: #e5e7eb;
+        }
+        
+        .logout-btn-confirm {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+        }
+        
+        .logout-btn-confirm:hover {
+            background-color: #dc2626;
+        }
+        
+        /* Resume Preview Modal Styles */
+        .resume-preview-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background: white;
+            padding: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .resume-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .resume-preview-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .resume-preview-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .preview-action-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .preview-download-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+        }
+        
+        .preview-download-btn:hover {
+            background-color: #059669;
+        }
+        
+        .preview-close-btn {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+        }
+        
+        .preview-close-btn:hover {
+            background-color: #dc2626;
+        }
+        
+        .preview-content {
+            padding: 0;
+            background: white;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Include Sidebar -->
+    <div id="sidebar-container"></div>
+   
+    <!-- Main Content Area -->
+    <main id="main-content" class="main-content">
+        <div class="p-6">
+            <!-- Profile Status -->
+            <div id="profile-status-container" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="flex items-center">
+                    <i data-lucide="info" class="h-5 w-5 text-blue-600 mr-2"></i>
+                    <span id="profile-status" class="text-blue-800">Loading profile data...</span>
+                </div>
+            </div>
+           
+            <!-- Template Selection -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Choose a Resume Template</h2>
+                <div id="resume-templates" class="resume-template-grid">
+                    <!-- Templates will be loaded here -->
+                </div>
+            </div>
+           
+            <!-- Resume Preview Modal -->
+            <div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+                <div class="flex items-center justify-center min-h-screen p-4">
+                    <div class="relative hide-scrollbar" style="height:90vh;width:800px;max-width:95vw;">
+                        <div id="resume-preview" class="resume-preview-container">
+                            <!-- Resume content will be generated here -->
+                            <div class="text-center text-gray-500 py-20">
+                                <i data-lucide="file-text" class="h-16 w-16 mx-auto mb-4 text-gray-300"></i>
+                                <p>Loading preview...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+            <!-- Error message container (hidden by default) -->
+            <div id="error-container" style="display: none;"></div>
+        </div>
+    </main>
+    <!-- Library Status Indicator -->
+    <div id="library-status" class="library-status">Loading libraries...</div>
+    
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-modal" class="logout-modal" style="display: none;">
+        <div class="logout-modal-content">
+            <div class="logout-modal-icon">
+                <i data-lucide="log-out" class="h-8 w-8 text-red-500"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Confirm Logout</h3>
+            <p class="text-gray-600 mb-6">Are you sure you want to log out of your account?</p>
+            <div class="logout-modal-buttons">
+                <button id="logout-cancel-btn" class="logout-btn logout-btn-cancel">Cancel</button>
+                <button id="logout-confirm-btn" class="logout-btn logout-btn-confirm">Logout</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API Base URL
+        const API_BASE_URL = 'http://localhost:8081';
+        
+        // Global variables
+        let selectedTemplate = null;
+        let userData = null;
+        let resumeTemplates = {};
+        let pageManagerInstance = null; // Store the PageManager instance globally
+        let userId = null;
+       
+        // Check library status
+        function checkLibraryStatus() {
+            const statusElement = document.getElementById('library-status');
+            const html2canvasLoaded = typeof html2canvas !== 'undefined';
+            const jspdfLoaded = typeof jspdf !== 'undefined' && typeof jspdf.jsPDF !== 'undefined';
+           
+            if (html2canvasLoaded && jspdfLoaded) {
+                statusElement.textContent = 'Libraries loaded';
+                statusElement.style.background = 'rgba(16, 185, 129, 0.7)';
+            } else {
+                statusElement.textContent = `html2canvas: ${html2canvasLoaded ? '✓' : '✗'}, jsPDF: ${jspdfLoaded ? '✓' : '✗'}`;
+                statusElement.style.background = 'rgba(239, 68, 68, 0.7)';
+            }
+        }
+       
+        // Check library status every second until loaded
+        const libraryCheckInterval = setInterval(() => {
+            checkLibraryStatus();
+            if (typeof html2canvas !== 'undefined' && typeof jspdf !== 'undefined' && typeof jspdf.jsPDF !== 'undefined') {
+                clearInterval(libraryCheckInterval);
+            }
+        }, 1000);
+       
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            pageManagerInstance = new PageManager();
+            window.pageManager = pageManagerInstance;
+        });
+       
+        class PageManager {
+            constructor() {
+                this.loadSidebar();
+                this.loadUserData();
+                this.setupEventListeners();
+            }
+           
+            loadSidebar() {
+                const container = document.getElementById('sidebar-container');
+                
+                // Show loading state
+                container.innerHTML = `
+                    <div class="sidebar-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading sidebar...</p>
+                    </div>
+                `;
+                
+                fetch('sidebar.html')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        const overlay = doc.getElementById('sidebar-overlay');
+                        const sidebar = doc.getElementById('sidebar');
+                        const header = doc.getElementById('top-header');
+                        const mobileHeader = doc.getElementById('mobile-header');
+                        const style = doc.querySelector('style');
+                        
+                        if (style) {
+                            document.head.appendChild(style);
+                        }
+                        
+                        // Clear container and add sidebar elements
+                        container.innerHTML = '';
+                        
+                        if (overlay) container.appendChild(overlay);
+                        if (sidebar) container.appendChild(sidebar);
+                        
+                        if (header) {
+                            document.body.insertBefore(header, document.getElementById('main-content'));
+                        }
+                        if (mobileHeader) {
+                            document.body.insertBefore(mobileHeader, document.getElementById('main-content'));
+                        }
+                        
+                        this.initializeSidebarFunctionality();
+                        lucide.createIcons();
+                        
+                        setTimeout(() => {
+                            this.updateWelcomeMessage();
+                        }, 100);
+                    })
+                    .catch(error => {
+                        console.error('Error loading sidebar:', error);
+                        
+                        // Show error state
+                        container.innerHTML = `
+                            <div class="sidebar-error">
+                                <i data-lucide="alert-triangle"></i>
+                                <h3>Failed to load sidebar</h3>
+                                <p>There was an error loading the sidebar. Please try refreshing the page.</p>
+                                <button onclick="location.reload()">Refresh Page</button>
+                            </div>
+                        `;
+                        
+                        // Initialize icons for error state
+                        lucide.createIcons();
+                    });
+            }
+           
+            initializeSidebarFunctionality() {
+                // Initialize sidebar (same as other pages)
+                class SidebarManager {
+                    constructor() {
+                        this.sidebar = document.getElementById('sidebar');
+                        this.sidebarToggle = document.getElementById('sidebar-toggle');
+                        this.sidebarOverlay = document.getElementById('sidebar-overlay');
+                        this.logoutBtn = document.getElementById('logout-btn');
+                        this.mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+                        this.mobileNotificationBtn = document.getElementById('mobile-notification-btn');
+                        this.isCollapsed = false;
+                        this.isMobile = window.innerWidth < 768;
+                        this.init();
+                    }
+                    
+                    init() {
+                        this.handleResize();
+                        if (!this.isMobile) {
+                            const savedState = localStorage.getItem('sidebarCollapsed');
+                            this.isCollapsed = savedState === 'true';
+                            this.updateToggleIcon(this.isCollapsed ? 'chevron-right' : 'chevron-left');
+                        }
+                        this.sidebarToggle.addEventListener('click', () => this.toggleSidebar());
+                        this.sidebarOverlay.addEventListener('click', () => this.closeMobileSidebar());
+                        this.logoutBtn.addEventListener('click', () => this.showLogoutModal());
+                        if (this.mobileSidebarToggle) {
+                            this.mobileSidebarToggle.addEventListener('click', () => this.toggleMobileSidebar());
+                        }
+                        if (this.mobileNotificationBtn) {
+                            this.mobileNotificationBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Mobile notification button clicked');
+                                this.handleNotificationClick();
+                            });
+                        }
+                        const desktopNotificationBtn = document.getElementById('notification-btn');
+                        if (desktopNotificationBtn) {
+                            desktopNotificationBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('Desktop notification button clicked');
+                                this.handleNotificationClick();
+                            });
+                        }
+                        window.addEventListener('resize', () => this.handleResize());
+                        this.setActivePage('resumes');
+                        if (!this.isMobile && this.isCollapsed) {
+                            this.applySidebarState(true);
+                        }
+                        // Fetch notification count on initialization
+                        this.fetchNotificationCount();
+                        // Set up periodic refresh of notification count (every 5 minutes)
+                        setInterval(() => this.fetchNotificationCount(), 300000);
+                        
+                        // Setup logout modal event listeners
+                        this.setupLogoutModal();
+                    }
+                    
+                    setupLogoutModal() {
+                        const logoutModal = document.getElementById('logout-modal');
+                        const logoutCancelBtn = document.getElementById('logout-cancel-btn');
+                        const logoutConfirmBtn = document.getElementById('logout-confirm-btn');
+                        
+                        // Cancel button - just close the modal
+                        logoutCancelBtn.addEventListener('click', () => {
+                            logoutModal.style.display = 'none';
+                        });
+                        
+                        // Confirm button - perform logout
+                        logoutConfirmBtn.addEventListener('click', () => {
+                            this.performLogout();
+                        });
+                        
+                        // Close modal when clicking outside
+                        logoutModal.addEventListener('click', (e) => {
+                            if (e.target === logoutModal) {
+                                logoutModal.style.display = 'none';
+                            }
+                        });
+                    }
+                    
+                    showLogoutModal() {
+                        const logoutModal = document.getElementById('logout-modal');
+                        logoutModal.style.display = 'flex';
+                    }
+                    
+                    performLogout() {
+                        // Clear all session data
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        
+                        // Redirect to login page
+                        window.location.href = 'login.html';
+                    }
+                    
+                    fetchNotificationCount() {
+                        // Get user ID from session
+                        let loggedInUser = sessionStorage.getItem('loggedInUser') || localStorage.getItem('persistentLogin');
+                        if (!loggedInUser) {
+                            this.updateNotificationBadge(0);
+                            return;
+                        }
+                        try {
+                            const user = JSON.parse(loggedInUser);
+                            const userId = user.id;
+                            if (!userId) {
+                                this.updateNotificationBadge(0);
+                                return;
+                            }
+                            // Use the fetchNotificationCounts function from notification.js if available
+                            if (typeof window.fetchNotificationCounts === 'function') {
+                                window.fetchNotificationCounts().then(() => {
+                                    // Assuming fetchNotificationCounts updates a global variable or DOM
+                                    // Get the unread count from the DOM element updated by notification.js
+                                    const unreadCountElement = document.getElementById('unread-count');
+                                    const count = unreadCountElement ? parseInt(unreadCountElement.textContent) || 0 : 0;
+                                    this.updateNotificationBadge(count);
+                                }).catch(error => {
+                                    console.error('Error using fetchNotificationCounts:', error);
+                                    this.updateNotificationBadge(0);
+                                });
+                            } else {
+                                // Fallback implementation
+                                fetch(`${API_BASE_URL}/api/user/notifications/counts?userId=${userId}`)
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error(`HTTP error! status: ${response.status}`);
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        this.updateNotificationBadge(data.unread || 0);
+                                    })
+                                    .catch(error => {
+                                        console.error('Error fetching notification count:', error);
+                                        this.updateNotificationBadge(0);
+                                    });
+                            }
+                        } catch (e) {
+                            console.error('Error parsing user data:', e);
+                            this.updateNotificationBadge(0);
+                        }
+                    }
+                    
+                    updateNotificationBadge(count) {
+                        console.log('Updating notification badge with count:', count);
+                        const desktopBadge = document.getElementById('desktop-notification-count');
+                        const mobileBadge = document.getElementById('mobile-notification-count');
+                        if (count > 0) {
+                            if (desktopBadge) {
+                                desktopBadge.textContent = count > 99 ? '99+' : count;
+                                desktopBadge.classList.remove('hidden');
+                            }
+                            if (mobileBadge) {
+                                mobileBadge.textContent = count > 99 ? '99+' : count;
+                                mobileBadge.classList.remove('hidden');
+                            }
+                        } else {
+                            if (desktopBadge) desktopBadge.classList.add('hidden');
+                            if (mobileBadge) mobileBadge.classList.add('hidden');
+                        }
+                    }
+                    
+                    handleResize() {
+                        const wasMobile = this.isMobile;
+                        this.isMobile = window.innerWidth < 768;
+                        if (wasMobile !== this.isMobile) {
+                            if (this.isMobile) {
+                                this.sidebar.classList.remove('sidebar-collapsed');
+                                this.sidebar.classList.remove('sidebar-expanded');
+                                this.closeMobileSidebar();
+                            } else {
+                                this.sidebar.classList.remove('mobile-open');
+                                this.sidebarOverlay.classList.add('hidden');
+                                const savedState = localStorage.getItem('sidebarCollapsed');
+                                this.isCollapsed = savedState === 'true';
+                                this.applySidebarState(this.isCollapsed);
+                            }
+                        }
+                    }
+                    
+                    toggleSidebar() {
+                        if (this.isMobile) {
+                            this.toggleMobileSidebar();
+                        } else {
+                            this.isCollapsed = !this.isCollapsed;
+                            this.applySidebarState(this.isCollapsed);
+                            localStorage.setItem('sidebarCollapsed', this.isCollapsed);
+                        }
+                    }
+                    
+                    toggleMobileSidebar() {
+                        const isOpen = this.sidebar.classList.contains('mobile-open');
+                        if (isOpen) {
+                            this.closeMobileSidebar();
+                        } else {
+                            this.openMobileSidebar();
+                        }
+                    }
+                    
+                    openMobileSidebar() {
+                        this.sidebar.classList.add('mobile-open');
+                        this.sidebarOverlay.classList.remove('hidden');
+                        document.body.style.overflow = 'hidden';
+                    }
+                    
+                    closeMobileSidebar() {
+                        this.sidebar.classList.remove('mobile-open');
+                        this.sidebarOverlay.classList.add('hidden');
+                        document.body.style.overflow = '';
+                    }
+                    
+                    applySidebarState(collapsed) {
+                        if (collapsed) {
+                            this.sidebar.classList.add('sidebar-collapsed');
+                            this.sidebar.classList.remove('sidebar-expanded');
+                            this.updateToggleIcon('chevron-right');
+                        } else {
+                            this.sidebar.classList.remove('sidebar-collapsed');
+                            this.sidebar.classList.add('sidebar-expanded');
+                            this.updateToggleIcon('chevron-left');
+                        }
+                        this.notifyMainContent();
+                    }
+                    
+                    updateToggleIcon(iconName) {
+                        const toggleIcon = this.sidebarToggle.querySelector('i');
+                        if (toggleIcon) {
+                            toggleIcon.setAttribute('data-lucide', iconName);
+                            lucide.createIcons();
+                        }
+                    }
+                    
+                    setActivePage(pageName) {
+                        const sidebarItems = document.querySelectorAll('.sidebar-item');
+                        sidebarItems.forEach(item => {
+                            item.classList.remove('active');
+                            if (item.getAttribute('data-page') === pageName) {
+                                item.classList.add('active');
+                            }
+                        });
+                    }
+                    
+                    handleNotificationClick() {
+                        console.log('Notification button clicked, redirecting to notifications page');
+                        window.location.href = 'notifications.html';
+                    }
+                    
+                    notifyMainContent() {
+                        const event = new CustomEvent('sidebarStateChanged', {
+                            detail: {
+                                isCollapsed: this.isCollapsed,
+                                isMobile: this.isMobile
+                            }
+                        });
+                        window.dispatchEvent(event);
+                    }
+                }
+                new SidebarManager();
+            }
+           
+            updateWelcomeMessage() {
+                const welcomeMessage = document.getElementById('welcome-message');
+                const headerSubtitle = document.getElementById('header-subtitle');
+               
+                if (welcomeMessage) {
+                    welcomeMessage.textContent = 'Resume Builder';
+                }
+                if (headerSubtitle) {
+                    headerSubtitle.textContent = 'Create professional resumes with templates';
+                }
+               
+                const currentDateElement = document.getElementById('current-date');
+                if (currentDateElement) {
+                    const now = new Date();
+                    const options = { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit', 
+                    };
+                    currentDateElement.textContent = now.toLocaleDateString('en-US', options);
+                }
+            }
+           
+            loadUserData() {
+                const profileStatus = document.getElementById('profile-status');
+                const profileStatusContainer = document.getElementById('profile-status-container');
+                
+                // Show loading state
+                if (profileStatus) {
+                    profileStatus.innerHTML = `
+                        <div class="profile-status-loading">
+                            <div class="loading-spinner"></div>
+                            <span>Loading profile data...</span>
+                        </div>
+                    `;
+                }
+                
+                // Get user ID from session
+                this.getUserIdFromSession().then(userId => {
+                    if (!userId) {
+                        if (profileStatus) {
+                            profileStatus.textContent = 'User not logged in. Please login first.';
+                        }
+                        if (profileStatusContainer) {
+                            profileStatusContainer.className = 'bg-red-50 border border-red-200 rounded-lg p-4 mb-6';
+                        }
+                        return;
+                    }
+                    
+                    // Fetch profile data from API
+                    this.fetchProfileData(userId);
+                }).catch(error => {
+                    console.error('Error getting user ID:', error);
+                    if (profileStatus) {
+                        profileStatus.textContent = 'Error loading user session. Please login again.';
+                    }
+                    if (profileStatusContainer) {
+                        profileStatusContainer.className = 'bg-red-50 border border-red-200 rounded-lg p-4 mb-6';
+                    }
+                });
+            }
+           
+            getUserIdFromSession() {
+                return new Promise((resolve, reject) => {
+                    // Check sessionStorage first
+                    let loggedInUser = sessionStorage.getItem('loggedInUser');
+                    
+                    if (loggedInUser) {
+                        try {
+                            const userData = JSON.parse(loggedInUser);
+                            resolve(userData.id);
+                            return;
+                        } catch (e) {
+                            console.error('Error parsing logged in user data:', e);
+                        }
+                    }
+                    
+                    // Check localStorage for persistent login
+                    const persistentLogin = localStorage.getItem('persistentLogin');
+                    if (persistentLogin) {
+                        try {
+                            const persistentData = JSON.parse(persistentLogin);
+                            
+                            // Check if the persistent login has expired
+                            if (persistentData.expiresAt && new Date(persistentData.expiresAt) > new Date()) {
+                                // If not expired, use the persistent login data
+                                sessionStorage.setItem('loggedInUser', JSON.stringify(persistentData));
+                                resolve(persistentData.id);
+                                return;
+                            } else {
+                                // If expired, remove the persistent login data
+                                localStorage.removeItem('persistentLogin');
+                                console.log('Removed expired persistent login data');
+                            }
+                        } catch (e) {
+                            console.error('Error parsing persistent login data:', e);
+                            localStorage.removeItem('persistentLogin');
+                        }
+                    }
+                    
+                    // If we get here, no valid session found
+                    resolve(null);
+                });
+            }
+           
+            fetchProfileData(userId) {
+                const profileStatus = document.getElementById('profile-status');
+                const profileStatusContainer = document.getElementById('profile-status-container');
+                
+                console.log(`Fetching profile for user ID: ${userId}`);
+                
+                fetch(`${API_BASE_URL}/api/user/profile/${userId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            if (response.status === 401) {
+                                // Unauthorized, clear session and redirect to login
+                                sessionStorage.removeItem('loggedInUser');
+                                localStorage.removeItem('persistentLogin');
+                                window.location.href = 'login.html';
+                                throw new Error('Unauthorized access');
+                            }
+                            throw new Error('Failed to fetch profile');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Profile data received:', data.profile);
+                            userData = this.sanitizeUserData(data.profile);
+                            
+                            // Check if references are missing
+                            if (!userData.references || userData.references.length === 0) {
+                                if (profileStatus) {
+                                    profileStatus.innerHTML = `
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center">
+                                                <i data-lucide="alert-triangle" class="h-5 w-5 text-yellow-600 mr-2"></i>
+                                                <span class="text-yellow-800">Profile loaded for ${userData.firstName || ''} ${userData.lastName || ''}, but no references found. Add references to include them in your resume.</span>
+                                            </div>
+                                            <button id="add-references-btn" class="ml-4 px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors">
+                                                Add References
+                                            </button>
+                                        </div>
+                                    `;
+                                }
+                                
+                                // Add event listener to the button
+                                setTimeout(() => {
+                                    const addReferencesBtn = document.getElementById('add-references-btn');
+                                    if (addReferencesBtn) {
+                                        addReferencesBtn.addEventListener('click', function() {
+                                            // Redirect to profile page or open a modal to add references
+                                            window.location.href = 'profile.html#references';
+                                        });
+                                    }
+                                }, 100);
+                                
+                                if (profileStatusContainer) {
+                                    profileStatusContainer.className = 'bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6';
+                                }
+                            } else {
+                                // Existing success message
+                                if (profileStatus) {
+                                    profileStatus.textContent = `Profile loaded for ${userData.firstName || ''} ${userData.lastName || ''}`;
+                                    profileStatus.className = 'text-green-800';
+                                }
+                                
+                                if (profileStatusContainer) {
+                                    profileStatusContainer.className = 'bg-green-50 border border-green-200 rounded-lg p-4 mb-6';
+                                }
+                            }
+                            
+                            this.initializeResumeTemplates();
+                        } else {
+                            console.error('Error fetching profile:', data.message);
+                            if (profileStatus) {
+                                profileStatus.textContent = 'Error loading profile: ' + data.message;
+                                profileStatus.className = 'text-red-800';
+                            }
+                            if (profileStatusContainer) {
+                                profileStatusContainer.className = 'bg-red-50 border border-red-200 rounded-lg p-4 mb-6';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching profile:', error);
+                        if (profileStatus) {
+                            profileStatus.textContent = 'Error fetching profile. Please check your connection and try again.';
+                            profileStatus.className = 'text-red-800';
+                        }
+                        if (profileStatusContainer) {
+                            profileStatusContainer.className = 'bg-red-50 border border-red-200 rounded-lg p-4 mb-6';
+                        }
+                    });
+            }
+           
+            sanitizeUserData(userData) {
+                if (!userData) return {};
+                
+                return {
+                    firstName: userData.firstName || 'John',
+                    lastName: userData.lastName || 'Doe',
+                    email: userData.email || 'john.doe@email.com',
+                    phone: userData.phone || userData.mobile || '',
+                    address: userData.address || '',
+                    dob: userData.dob || '',
+                    objective: userData.objective || '',
+                    education: Array.isArray(userData.education) ? userData.education : [],
+                    skills: Array.isArray(userData.skills) ? userData.skills : [],
+                    experience: Array.isArray(userData.experience) ? userData.experience : [],
+                    projects: Array.isArray(userData.projects) ? userData.projects : [],
+                    certifications: Array.isArray(userData.certifications) ? userData.certifications.map(cert => {
+                        // Normalize certification data
+                        return {
+                            certificate_name: cert.certificate_name || cert.name || cert.title || '',
+                            issuing_organization: cert.issuing_organization || cert.organization || cert.issuer || '',
+                            issue_date: cert.issue_date || cert.date || ''
+                        };
+                    }) : [],
+                    achievements: Array.isArray(userData.achievements) ? userData.achievements : [],
+                    languages: Array.isArray(userData.languages) ? userData.languages : [],
+                    hobbies: Array.isArray(userData.hobbies) ? userData.hobbies : [],
+                    references: Array.isArray(userData.references) ? userData.references.map(ref => {
+                        // Try different possible field names for reference data
+                        const name = ref.name || ref.reference_name || ref.refName || '';
+                        const designation = ref.designation || ref.relation || ref.position || '';
+                        const contactInfo = ref.contact_info || ref.contactInfo || ref.contact || '';
+                        const organization = ref.organization || ref.company || '';
+                        // Parse contactInfo to extract email and phone if needed
+                        let email = '';
+                        let phone = '';
+                        
+                        if (contactInfo) {
+                            // Simple parsing - adjust based on your actual data format
+                            const emailMatch = contactInfo.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
+                            const phoneMatch = contactInfo.match(/(\d[\d -]{7,}\d)/);
+                            
+                            if (emailMatch) email = emailMatch[0];
+                            if (phoneMatch) phone = phoneMatch[0];
+                        }
+                        
+                        return {
+                            name: name,
+                            designation: designation,
+                            contact_info: contactInfo,
+                            email: email,
+                            phone: phone,
+                            organization: organization
+                        };
+                    }) : []
+                };
+            }
+           
+            initializeResumeTemplates() {
+                if (!userData) return;
+               
+                const container = document.getElementById('resume-templates');
+                if (!container) return;
+               
+                // Define resume templates
+                resumeTemplates = {
+                    classic: {
+                        name: "Classic Blue",
+                        description: "Professional blue-themed resume with two-column layout",
+                        preview: this.generateClassicPreview(userData)
+                    },
+                    modern: {
+                        name: "Modern Gray",
+                        description: "Contemporary gray design with sidebar layout",
+                        preview: this.generateModernPreview(userData)
+                    },
+                    elegant: {
+                        name: "Elegant Green",
+                        description: "Sophisticated green-themed centered layout",
+                        preview: this.generateElegantPreview(userData)
+                    },
+                    professional: {
+                        name: "Professional Black",
+                        description: "Formal black and white design for corporate positions",
+                        preview: this.generateProfessionalPreview(userData)
+                    },
+                    creative: {
+                        name: "Creative Purple",
+                        description: "Artistic purple design with split layout",
+                        preview: this.generateCreativePreview(userData)
+                    },
+                    minimal: {
+                        name: "Minimal Red",
+                        description: "Clean and simple design with red accents",
+                        preview: this.generateMinimalPreview(userData)
+                    }
+                };
+               
+                // Render templates
+                container.innerHTML = Object.keys(resumeTemplates).map(key => `
+                    <div class="resume-template ${selectedTemplate === key ? 'selected' : ''}"
+                         data-template="${key}">
+                        <h3>${resumeTemplates[key].name}</h3>
+                        <p>${resumeTemplates[key].description}</p>
+                        <div class="resume-preview">${resumeTemplates[key].preview}</div>
+                        <div class="template-actions">
+                            <button class="template-action-btn preview-btn" data-action="preview" data-template="${key}" title="Preview Resume">
+                                <i data-lucide="eye" class="h-4 w-4"></i>
+                            </button>
+                            <button class="template-action-btn download-btn" data-action="download" data-template="${key}" title="Download PDF">
+                                <i data-lucide="download" class="h-4 w-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+               
+                // Add event listeners to template action buttons
+                const previewBtns = container.querySelectorAll('.preview-btn');
+                const downloadBtns = container.querySelectorAll('.download-btn');
+               
+                previewBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const templateKey = btn.getAttribute('data-template');
+                        this.previewTemplate(templateKey);
+                    });
+                });
+               
+                downloadBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const templateKey = btn.getAttribute('data-template');
+                        this.downloadTemplate(templateKey);
+                    });
+                });
+               
+                lucide.createIcons();
+            }
+           
+            generateClassicPreview(userData) {
+                return `
+                    <div style="font-family: Arial, sans-serif; font-size: 10px; line-height: 1.3; color: #111; background:#fff; border:1px solid #e5e7eb; height: 180px; overflow: hidden; border-radius:8px;">
+                        <div style="background:#1e40af; color:#fff; padding:8px; text-align:center;">
+                            <div style="font-weight:700; font-size:12px;">${userData.firstName || ''} ${userData.lastName || ''}</div>
+                            <div style="font-size:8px; opacity:0.9;">${userData.email || ''} | ${userData.phone || ''}</div>
+                        </div>
+                        <div style="display:flex; gap:10px; padding:8px;">
+                            <div style="flex:1;">
+                                <div style="font-weight:700; font-size:9px; color:#1e40af; margin-bottom:4px;">SKILLS</div>
+                                <div style="font-size:8px;">
+                                    ${(userData.skills || []).slice(0, 3).map(s => `<span style="background:#dbeafe; padding:2px 4px; border-radius:3px; margin-right:2px; display:inline-block; margin-bottom:2px;">${typeof s === 'object' ? (s.skill_name || s.name || '') : s}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div style="flex:2;">
+                                <div style="font-weight:700; font-size:9px; color:#1e40af; margin-bottom:4px;">EXPERIENCE</div>
+                                <div style="font-size:8px; margin-bottom:6px;">
+                                    ${(userData.experience && userData.experience.length) ? 
+                                        `${userData.experience[0].role || userData.experience[0].position || 'Role'} at ${userData.experience[0].company_name || userData.experience[0].company || 'Company'}` : 
+                                        'Add your experience'}
+                                </div>
+                                <div style="font-weight:700; font-size:9px; color:#1e40af; margin-bottom:4px;">EDUCATION</div>
+                                <div style="font-size:8px;">
+                                    ${(userData.education && userData.education.length) ? 
+                                        `${userData.education[0].degree || 'Degree'} from ${userData.education[0].institution_name || userData.education[0].institution || 'Institution'}` : 
+                                        'Add your education'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            generateModernPreview(userData) {
+                return `
+                    <div style="font-family: Arial, sans-serif; font-size: 10px; line-height: 1.3; color: #111; background:#f9fafb; border:1px solid #e5e7eb; height: 180px; overflow: hidden; border-radius:8px;">
+                        <div style="display:flex; height:100%;">
+                            <div style="width:60px; background:#e5e7eb; padding:8px 4px;">
+                                <div style="font-weight:700; font-size:8px; color:#1f2937; margin-bottom:8px; writing-mode:vertical-rl; text-orientation:mixed;">SKILLS</div>
+                                <div style="font-weight:700; font-size:8px; color:#1f2937; margin-bottom:8px; writing-mode:vertical-rl; text-orientation:mixed;">LANGUAGES</div>
+                                <div style="font-weight:700; font-size:8px; color:#1f2937; writing-mode:vertical-rl; text-orientation:mixed;">HOBBIES</div>
+                            </div>
+                            <div style="flex:1; padding:8px;">
+                                <div style="font-weight:700; font-size:12px; text-align:left; margin-bottom:4px;">${userData.firstName || ''} ${userData.lastName || ''}</div>
+                                <div style="font-size:8px; text-align:left; color:#4b5563; margin-bottom:8px;">${userData.email || ''} | ${userData.phone || ''}</div>
+                                
+                                <div style="font-weight:700; font-size:9px; color:#1f2937; margin-bottom:4px;">EXPERIENCE</div>
+                                <div style="font-size:8px; margin-bottom:6px;">
+                                    ${(userData.experience && userData.experience.length) ? 
+                                        `${userData.experience[0].role || userData.experience[0].position || 'Role'} at ${userData.experience[0].company_name || userData.experience[0].company || 'Company'}` : 
+                                        'Add your experience'}
+                                </div>
+                                
+                                <div style="font-weight:700; font-size:9px; color:#1f2937; margin-bottom:4px;">EDUCATION</div>
+                                <div style="font-size:8px; margin-bottom:6px;">
+                                    ${(userData.education && userData.education.length) ? 
+                                        `${userData.education[0].degree || 'Degree'} from ${userData.education[0].institution_name || userData.education[0].institution || 'Institution'}` : 
+                                        'Add your education'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            generateElegantPreview(userData) {
+                return `
+                    <div style="font-family: Georgia, serif; font-size: 10px; line-height: 1.3; color: #111; background:#f0fdf4; border:1px solid #e5e7eb; height: 180px; overflow: hidden; border-radius:8px;">
+                        <div style="padding:8px; text-align:center;">
+                            <div style="font-weight:700; font-size:14px; color:#166534; margin-bottom:4px; font-style:italic;">${userData.firstName || ''} ${userData.lastName || ''}</div>
+                            <div style="font-size:8px; color:#4b5563; margin-bottom:12px; font-style:italic;">${userData.email || ''} | ${userData.phone || ''}</div>
+                            
+                            <div style="text-align:left;">
+                                <div style="font-weight:700; font-size:10px; color:#166534; margin-bottom:4px; font-style:italic;">Professional Summary</div>
+                                <div style="font-size:8px; margin-bottom:8px;">${userData.objective ? userData.objective.substring(0, 60) + '...' : 'Professional summary goes here'}</div>
+                                
+                                <div style="font-weight:700; font-size:10px; color:#166534; margin-bottom:4px; font-style:italic;">Experience</div>
+                                <div style="font-size:8px; margin-bottom:8px;">
+                                    ${(userData.experience && userData.experience.length) ? 
+                                        `${userData.experience[0].role || userData.experience[0].position || 'Role'} at ${userData.experience[0].company_name || userData.experience[0].company || 'Company'}` : 
+                                        'Add your experience'}
+                                </div>
+                                
+                                <div style="font-weight:700; font-size:10px; color:#166534; margin-bottom:4px; font-style:italic;">Education</div>
+                                <div style="font-size:8px;">
+                                    ${(userData.education && userData.education.length) ? 
+                                        `${userData.education[0].degree || 'Degree'} from ${userData.education[0].institution_name || userData.education[0].institution || 'Institution'}` : 
+                                        'Add your education'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            generateProfessionalPreview(userData) {
+                return `
+                    <div style="font-family: Arial, sans-serif; font-size: 10px; line-height: 1.3; color: #000; background:#fff; border:2px solid #000; height: 180px; overflow: hidden; border-radius:0px;">
+                        <div style="background:#000; color:#fff; padding:8px; text-align:center;">
+                            <div style="font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:1px;">${userData.firstName || ''} ${userData.lastName || ''}</div>
+                            <div style="font-size:8px; opacity:0.9;">${userData.email || ''} | ${userData.phone || ''}</div>
+                        </div>
+                        <div style="padding:8px;">
+                            <div style="font-weight:700; font-size:9px; color:#000; margin-bottom:4px; text-transform:uppercase; text-align:center;">OBJECTIVE</div>
+                            <div style="font-size:8px; margin-bottom:6px; text-align:center;">${userData.objective ? userData.objective.substring(0, 60) + '...' : 'Professional objective'}</div>
+                            
+                            <div style="display:flex; gap:10px;">
+                                <div style="flex:1;">
+                                    <div style="font-weight:700; font-size:9px; color:#000; margin-bottom:4px; text-transform:uppercase;">Experience</div>
+                                    <div style="font-size:8px; margin-bottom:6px;">
+                                        ${(userData.experience && userData.experience.length) ? 
+                                            `${userData.experience[0].role || userData.experience[0].position || 'Role'}` : 
+                                            'Add experience'}
+                                    </div>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:700; font-size:9px; color:#000; margin-bottom:4px; text-transform:uppercase;">Education</div>
+                                    <div style="font-size:8px;">
+                                        ${(userData.education && userData.education.length) ? 
+                                            `${userData.education[0].degree || 'Degree'}` : 
+                                            'Add education'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            generateCreativePreview(userData) {
+                return `
+                    <div style="font-family: Georgia, serif; font-size: 10px; line-height: 1.3; color: #4c1d95; background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%); border:1px solid #e4e8f0; height: 180px; overflow: hidden; border-radius:8px;">
+                        <div style="display:flex; height:100%;">
+                            <div style="width:80px; background:rgba(126, 34, 206, 0.1); padding:8px 4px;">
+                                <div style="font-weight:700; font-size:8px; color:#7e22ce; margin-bottom:8px; writing-mode:vertical-rl; text-orientation:mixed;">SKILLS</div>
+                                <div style="font-weight:700; font-size:8px; color:#7e22ce; margin-bottom:8px; writing-mode:vertical-rl; text-orientation:mixed;">PROJECTS</div>
+                                <div style="font-weight:700; font-size:8px; color:#7e22ce; writing-mode:vertical-rl; text-orientation:mixed;">CONTACT</div>
+                            </div>
+                            <div style="flex:1; padding:8px;">
+                                <div style="font-weight:700; font-size:14px; text-align:left; border-left:4px solid #7e22ce; padding-left:8px; margin-bottom:8px;">${userData.firstName || ''} ${userData.lastName || ''}</div>
+                                <div style="font-size:8px; text-align:left; font-style:italic; margin-bottom:12px;">${userData.email || ''} | ${userData.phone || ''}</div>
+                                
+                                <div style="font-weight:700; font-size:10px; color:#7e22ce; margin-bottom:4px; font-style:italic;">Experience</div>
+                                <div style="font-size:8px; margin-bottom:8px;">
+                                    ${(userData.experience && userData.experience.length) ? 
+                                        `${userData.experience[0].role || userData.experience[0].position || 'Role'} at ${userData.experience[0].company_name || userData.experience[0].company || 'Company'}` : 
+                                        'Add your experience'}
+                                </div>
+                                
+                                <div style="font-weight:700; font-size:10px; color:#7e22ce; margin-bottom:4px; font-style:italic;">Education</div>
+                                <div style="font-size:8px;">
+                                    ${(userData.education && userData.education.length) ? 
+                                        `${userData.education[0].degree || 'Degree'} from ${userData.education[0].institution_name || userData.education[0].institution || 'Institution'}` : 
+                                        'Add your education'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            generateMinimalPreview(userData) {
+                return `
+                    <div style="font-family: Arial, sans-serif; font-size: 10px; line-height: 1.3; color: #b91c1c; background:#fff; border:none; height: 180px; overflow: hidden; border-radius:0px; padding:15px;">
+                        <div style="font-weight:300; font-size:16px; text-align:left; letter-spacing:1px; margin-bottom:8px; border-bottom:1px solid #b91c1c; padding-bottom:4px;">${userData.firstName || ''} ${userData.lastName || ''}</div>
+                        <div style="font-size:8px; text-align:left; margin-bottom:15px;">${userData.email || ''} | ${userData.phone || ''}</div>
+                        
+                        <div style="font-weight:300; font-size:9px; color:#b91c1c; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Experience</div>
+                        <div style="font-size:8px; margin-bottom:12px;">
+                            ${(userData.experience && userData.experience.length) ? 
+                                `${userData.experience[0].role || userData.experience[0].position || 'Role'} at ${userData.experience[0].company_name || userData.experience[0].company || 'Company'}` : 
+                                'Add your experience'}
+                        </div>
+                        
+                        <div style="font-weight:300; font-size:9px; color:#b91c1c; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Education</div>
+                        <div style="font-size:8px; margin-bottom:12px;">
+                            ${(userData.education && userData.education.length) ? 
+                                `${userData.education[0].degree || 'Degree'} from ${userData.education[0].institution_name || userData.education[0].institution || 'Institution'}` : 
+                                'Add your education'}
+                        </div>
+                        
+                        <div style="font-weight:300; font-size:9px; color:#b91c1c; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Skills</div>
+                        <div style="font-size:8px;">
+                            ${(userData.skills || []).slice(0, 3).map(s => `<span style="border-bottom:1px solid #b91c1c; margin-right:8px; padding-bottom:1px;">${typeof s === 'object' ? (s.skill_name || s.name || '') : s}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+           
+            setupEventListeners() {
+                const refreshBtn = document.getElementById('refresh-data-btn');
+                const exportBtn = document.getElementById('export-pdf-btn');
+               
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', () => {
+                        this.loadUserData();
+                    });
+                }
+               
+                if (exportBtn) {
+                    exportBtn.addEventListener('click', () => {
+                        this.exportToPDF();
+                    });
+                }
+            }
+           
+            previewTemplate(templateKey) {
+                if (!userData) {
+                    alert('Profile data not loaded. Please refresh the page.');
+                    return;
+                }
+               
+                selectedTemplate = templateKey;
+               
+                // Update template selection UI
+                document.querySelectorAll('.resume-template').forEach(template => {
+                    template.classList.remove('selected');
+                });
+                document.querySelector(`.resume-template[data-template="${templateKey}"]`).classList.add('selected');
+               
+                // Show loading in preview modal
+                const previewModal = document.getElementById('preview-modal');
+                const resumePreview = document.getElementById('resume-preview');
+                
+                resumePreview.innerHTML = `
+                    <div class="text-center text-gray-500 py-20">
+                        <i data-lucide="loader" class="h-16 w-16 mx-auto mb-4 animate-spin"></i>
+                        <p>Generating preview...</p>
+                    </div>
+                `;
+                
+                previewModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                
+                // Generate HTML content for preview
+                let previewContent;
+                try {
+                    previewContent = this.generateFullResumeHTML(userData, templateKey);
+                } catch (err) {
+                    console.error('Error generating preview content:', err);
+                    resumePreview.innerHTML = `
+                        <div class="text-center text-red-500 py-20">
+                            <i data-lucide="alert-circle" class="h-16 w-16 mx-auto mb-4"></i>
+                            <p>Error generating preview: ${err.message}</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Add header with download and close buttons
+                const templateName = resumeTemplates[templateKey].name;
+                resumePreview.innerHTML = `
+                    <div class="resume-preview-header">
+                        <div class="resume-preview-title">${templateName} Resume</div>
+                        <div class="resume-preview-actions">
+                            <button class="preview-action-btn preview-download-btn" onclick="pageManagerInstance.downloadTemplate('${templateKey}')">
+                                <i data-lucide="download" class="h-4 w-4"></i> Download PDF
+                            </button>
+                            <button class="preview-action-btn preview-close-btn" onclick="document.getElementById('preview-modal').classList.add('hidden'); document.body.style.overflow = '';">
+                                <i data-lucide="x" class="h-4 w-4"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                    <div class="preview-content">
+                        ${previewContent}
+                    </div>
+                `;
+                
+                lucide.createIcons();
+            }
+           
+            downloadTemplate(templateKey) {
+                if (!userData) {
+                    alert('Profile data not loaded. Please refresh the page.');
+                    return;
+                }
+               
+                selectedTemplate = templateKey;
+               
+                // Update template selection UI
+                document.querySelectorAll('.resume-template').forEach(template => {
+                    template.classList.remove('selected');
+                });
+                document.querySelector(`.resume-template[data-template="${templateKey}"]`).classList.add('selected');
+               
+                // Show loading state on the download button
+                const downloadBtn = document.querySelector(`.download-btn[data-template="${templateKey}"]`);
+                const originalIcon = downloadBtn.innerHTML;
+                downloadBtn.innerHTML = '<i data-lucide="loader" class="h-4 w-4 animate-spin"></i>';
+                downloadBtn.disabled = true;
+                lucide.createIcons();
+               
+                // Store button reference for cleanup
+                this.currentDownloadBtn = downloadBtn;
+                this.originalDownloadIcon = originalIcon;
+               
+                // Directly export to PDF
+                this.exportToPDF();
+            }
+           
+            exportToPDF() {
+                if (!selectedTemplate || !userData) {
+                    alert('Please select a template first');
+                    return;
+                }
+                
+                const errorContainer = document.getElementById('error-container');
+                
+                // Hide any previous errors
+                if (errorContainer) {
+                    errorContainer.style.display = 'none';
+                    errorContainer.innerHTML = '';
+                }
+                
+                // Show loading indicator in library status
+                const libraryStatus = document.getElementById('library-status');
+                const originalStatusText = libraryStatus ? libraryStatus.textContent : '';
+                if (libraryStatus) {
+                    libraryStatus.textContent = 'Generating PDF...';
+                    libraryStatus.style.background = 'rgba(59, 130, 246, 0.9)';
+                }
+                
+                // Store reference to this for use in callbacks
+                const self = this;
+                
+                // Check if libraries are loaded
+                if (typeof html2canvas === 'undefined') {
+                    this.showError('html2canvas library is not loaded. Please refresh the page and try again.');
+                    this.resetLibraryStatus(originalStatusText);
+                    return;
+                }
+                
+                if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
+                    this.showError('jsPDF library is not loaded correctly. Please refresh the page and try again.');
+                    this.resetLibraryStatus(originalStatusText);
+                    return;
+                }
+                
+                // Create PDF content
+                let pdfContent;
+                try {
+                    pdfContent = this.generateFullResumeHTML(userData, selectedTemplate);
+                } catch (contentError) {
+                    console.error('Error generating PDF content:', contentError);
+                    this.showError('Error generating PDF content: ' + contentError.message);
+                    this.resetLibraryStatus(originalStatusText);
+                    return;
+                }
+                
+                // Create a temporary container for PDF generation
+                const tempContainer = document.createElement('div');
+                tempContainer.id = 'pdf-temp-container';
+                tempContainer.innerHTML = pdfContent;
+                tempContainer.style.width = '210mm';
+                tempContainer.style.backgroundColor = '#ffffff';
+                document.body.appendChild(tempContainer);
+                
+                // Add a small delay to ensure the content is rendered
+                setTimeout(() => {
+                    // Generate PDF using html2canvas and jsPDF
+                    html2canvas(tempContainer, {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff',
+                        width: tempContainer.scrollWidth,
+                        height: tempContainer.scrollHeight,
+                        logging: false,
+                        onclone: (clonedDoc) => {
+                            const clonedContainer = clonedDoc.getElementById('pdf-temp-container');
+                            if (clonedContainer) {
+                                clonedContainer.style.width = '210mm';
+                                clonedContainer.style.height = 'auto';
+                                clonedContainer.style.overflow = 'visible';
+                                clonedContainer.style.boxShadow = 'none';
+                                clonedContainer.style.border = 'none';
+                                clonedContainer.style.margin = '0';
+                                clonedContainer.style.padding = '0';
+                            }
+                        }
+                    }).then(canvas => {
+                        try {
+                            // Check if canvas is valid
+                            if (!canvas || canvas.width === 0 || canvas.height === 0) {
+                                throw new Error('Invalid canvas generated');
+                            }
+                            
+                            const imgData = canvas.toDataURL('image/png');
+                            
+                            // Create PDF
+                            const { jsPDF } = jspdf;
+                            const pdf = new jsPDF('p', 'mm', 'a4');
+                            const pageWidth = 210; // A4 width in mm
+                            const pageHeight = 297; // A4 height in mm
+                            
+                            // Calculate the total height of the image in mm
+                            const imgWidth = pageWidth;
+                            const imgHeight = (canvas.height * pageWidth) / canvas.width;
+                            
+                            // Check if the content fits on one page
+                            if (imgHeight <= pageHeight) {
+                                // If it fits on one page, just add the image
+                                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                            } else {
+                                // If it doesn't fit, we need to split it across multiple pages
+                                let remainingHeight = imgHeight;
+                                let sourceY = 0;
+                                
+                                while (remainingHeight > 0) {
+                                    // Calculate the height of the current page
+                                    const currentPageHeight = Math.min(remainingHeight, pageHeight);
+                                    
+                                    // Calculate the source height in pixels
+                                    const sourceHeight = (currentPageHeight * canvas.height) / imgHeight;
+                                    
+                                    // Create a new canvas for the current page
+                                    const pageCanvas = document.createElement('canvas');
+                                    pageCanvas.width = canvas.width;
+                                    pageCanvas.height = sourceHeight;
+                                    
+                                    // Get the context and draw the portion of the image
+                                    const pageCtx = pageCanvas.getContext('2d');
+                                    pageCtx.drawImage(
+                                        canvas,
+                                        0, sourceY, // source x, y
+                                        canvas.width, sourceHeight, // source width, height
+                                        0, 0, // dest x, y
+                                        canvas.width, sourceHeight // dest width, height
+                                    );
+                                    
+                                    // Convert to image data
+                                    const pageImgData = pageCanvas.toDataURL('image/png');
+                                    
+                                    // Add the page to the PDF (except for the first page)
+                                    if (sourceY > 0) {
+                                        pdf.addPage();
+                                    }
+                                    
+                                    // Add the image to the current page
+                                    pdf.addImage(pageImgData, 'PNG', 0, 0, imgWidth, currentPageHeight);
+                                    
+                                    // Update the remaining height and source position
+                                    remainingHeight -= currentPageHeight;
+                                    sourceY += sourceHeight;
+                                }
+                            }
+                            
+                            // Save the PDF
+                            const fileName = `${userData.firstName}_${userData.lastName}_Resume.pdf`;
+                            pdf.save(fileName);
+                            
+                            // Clean up
+                            document.body.removeChild(tempContainer);
+                            self.resetLibraryStatus(originalStatusText, 'PDF downloaded successfully!', 'rgba(16, 185, 129, 0.9)');
+                        } catch (pdfError) {
+                            console.error('Error creating PDF:', pdfError);
+                            self.showError('Error creating PDF: ' + pdfError.message);
+                            document.body.removeChild(tempContainer);
+                            self.resetLibraryStatus(originalStatusText);
+                        }
+                    }).catch(error => {
+                        console.error('Error generating canvas:', error);
+                        self.showError('Error generating PDF preview: ' + error.message);
+                        document.body.removeChild(tempContainer);
+                        self.resetLibraryStatus(originalStatusText);
+                    });
+                }, 1000); // Increased delay to ensure rendering
+            }
+           
+            showError(message) {
+                const errorContainer = document.getElementById('error-container');
+                if (errorContainer) {
+                    errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+                    errorContainer.style.display = 'block';
+                    
+                    // Auto-hide after 10 seconds
+                    setTimeout(() => {
+                        errorContainer.style.display = 'none';
+                    }, 10000);
+                }
+            }
+           
+            resetLibraryStatus(originalText, successMessage = null, successColor = null) {
+                const libraryStatus = document.getElementById('library-status');
+                if (libraryStatus) {
+                    if (successMessage) {
+                        libraryStatus.textContent = successMessage;
+                        libraryStatus.style.background = successColor || 'rgba(16, 185, 129, 0.9)';
+                        // Reset to original after 3 seconds
+                        setTimeout(() => {
+                            libraryStatus.textContent = originalText || 'Libraries loaded';
+                            libraryStatus.style.background = 'rgba(0, 0, 0, 0.7)';
+                        }, 3000);
+                    } else {
+                        libraryStatus.textContent = originalText || 'Libraries loaded';
+                        libraryStatus.style.background = 'rgba(0, 0, 0, 0.7)';
+                    }
+                }
+               
+                // Reset download button if it exists
+                if (this.currentDownloadBtn && this.originalDownloadIcon) {
+                    this.currentDownloadBtn.innerHTML = this.originalDownloadIcon;
+                    this.currentDownloadBtn.disabled = false;
+                    lucide.createIcons();
+                    this.currentDownloadBtn = null;
+                    this.originalDownloadIcon = null;
+                }
+            }
+           
+            generateFullResumeHTML(userData, template) {
+                const templates = {
+                    classic: this.generateClassicResume(userData),
+                    modern: this.generateModernResume(userData),
+                    elegant: this.generateElegantResume(userData),
+                    professional: this.generateProfessionalResume(userData),
+                    creative: this.generateCreativeResume(userData),
+                    minimal: this.generateMinimalResume(userData)
+                };
+               
+                return templates[template] || templates.classic;
+            }
+            
+            // Classic Resume Template - Two Column Layout
+            generateClassicResume(userData) {
+                const formatDateRange = (startDate, endDate, isCurrent = false) => {
+                    if (!startDate) return '';
+                    const start = new Date(startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    if (isCurrent) return `${start} - Present`;
+                    if (!endDate) return start;
+                    const end = new Date(endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    return `${start} - ${end}`;
+                };
+                
+                const formatYearRange = (startYear, endYear) => {
+                    if (!startYear) return '';
+                    if (!endYear) return startYear;
+                    return startYear === endYear ? startYear : `${startYear} - ${endYear}`;
+                };
+                
+                return `
+                    <div class="pdf-content" style="background: linear-gradient(to bottom, #ffffff, #f0f9ff); font-family: Arial, sans-serif; color: #000; padding: 0; margin: 0; box-shadow: none; border: none;">
+                        <!-- Header Section -->
+                        <div style="background: #1e40af; color: #fff; padding: 20px; text-align: center;">
+                            <h1 style="font-size: 28px; font-weight: bold; margin: 0;">${userData.firstName || ''} ${userData.lastName || ''}</h1>
+                            <div style="font-size: 14px; margin-top: 5px;">${userData.email || ''} | ${userData.phone || ''} | ${userData.address || ''}</div>
+                        </div>
+                        
+                        <!-- Two Column Layout -->
+                        <div style="display: flex; padding: 20px; gap: 30px;">
+                            <!-- Left Column -->
+                            <div style="flex: 1;">
+                                <!-- Skills Section -->
+                                ${userData.skills && userData.skills.length > 0 ? `
+                                <div style="margin-bottom: 25px;">
+                                    <h2 style="color: #1e40af; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">SKILLS</h2>
+                                    <div>
+                                        ${userData.skills.map(skill => {
+                                            const skillName = typeof skill === 'object' ? (skill.skill_name || skill.name) : skill;
+                                            const proficiency = typeof skill === 'object' ? skill.proficiency_level : '';
+                                            return `<span style="display: inline-block; background: #dbeafe; border: 1px solid #93c5fd; color: #1e40af; padding: 4px 10px; border-radius: 15px; margin: 0 5px 5px 0; font-size: 13px;">${skillName}${proficiency ? ` (${proficiency})` : ''}</span>`;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                                ` : ''}
+                                
+                                <!-- Languages Section -->
+                                ${userData.languages && userData.languages.length > 0 ? `
+                                <div style="margin-bottom: 25px;">
+                                    <h2 style="color: #1e40af; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">LANGUAGES</h2>
+                                    <div>
+                                        ${userData.languages.map(lang => `
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                                <span style="font-weight: 600;">${lang.language_name || lang.name || 'Language'}</span>
+                                                ${lang.proficiency_level ? `<span style="color: #4b5563;">${lang.proficiency_level}</span>` : ''}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                ` : ''}
+                                
+                                <!-- Hobbies Section -->
+                                ${userData.hobbies && userData.hobbies.length > 0 ? `
+                                <div style="margin-bottom: 25px;">
+                                    <h2 style="color: #1e40af; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">HOBBIES</h2>
+                                    <div>
+                                        ${userData.hobbies.map(hobby => {
+                                            const hobbyName = typeof hobby === 'object' ? (hobby.hobby_name || hobby.name) : hobby;
+                                            return `<span style="display: inline-block; background: #dbeafe; border: 1px solid #93c5fd; color: #1e40af; padding: 4px 10px; border-radius: 15px; margin: 0 5px 5px 0; font-size: 13px;">${hobbyName}</span>`;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            <!-- Right Column -->
+                            <div style="flex: 2;">
+                                <!-- Professional Summary Section -->
+                                ${userData.objective ? `
+                                <div style="margin-bottom: 25px;">
+                                    <h2 style="color: #1e40af; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">PROFESSIONAL SUMMARY</h2>
+                                    <p style="margin: 0; line-height: 1.6;">${userData.objective}</p>
+                                </div>
+                                ` : ''}
+                                
+                                <!-- Experience Section -->
+                                ${userData.experience && userData.experience.length > 0 ? `
+                                <div style="margin-bottom: 25px;">
+                                    <h2 style="color: #1e40af; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">EXPERIENCE</h2>
+                                    ${userData.experience.map(exp => `
+                                        <div style="margin-bottom: 15px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                                <div>
+                                                    <div style="font-weight: bold; color: #1e40af;">${exp.role || exp.position || exp.title || 'Position'}</div>
+                                                    <div style="color: #4b5563; font-style: italic;">${exp.company_name || exp.company || exp.organization || ''}</div>
+                                                </div>
+                                                <div style="color: #4b5563; font-size: 12px;">${formatDateRange(exp.start_date, exp.end_date, exp.is_current)}</div>
+                                            </div>
+                                            ${exp.description || exp.details ? `<div style="margin-top: 5px; color: #4b5563;">${exp.description || exp.details}</div>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ` : ''}
+                                
+                                <!-- Education Section -->
+                                ${userData.education && userData.education.length > 0 ? `
+                                <div style="margin-bottom: 25px;">
+                                    <h2 style="color: #1e40af; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">EDUCATION</h2>
+                                    ${userData.education.map(edu => `
+                                        <div style="margin-bottom: 15px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                                <div>
+                                                    <div style="font-weight: bold; color: #1e40af;">${edu.degree || edu.title || 'Degree'}</div>
+                                                    <div style="color: #4b5563; font-style: italic;">${edu.institution_name || edu.institution || edu.school || ''}</div>
+                                                </div>
+                                                <div style="color: #4b5563; font-size: 12px;">${formatYearRange(edu.start_year, edu.end_year)}</div>
+                                            </div>
+                                            ${edu.grade ? `<div style="margin-top: 5px; color: #4b5563;">Grade: ${edu.grade}%</div>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ` : ''}
+                                
+                                <!-- Projects Section -->
+                                ${userData.projects && userData.projects.length > 0 ? `
+                                <div style="margin-bottom: 25px;">
+                                    <h2 style="color: #1e40af; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">PROJECTS</h2>
+                                    ${userData.projects.map(project => `
+                                        <div style="margin-bottom: 15px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                                <div style="font-weight: bold; color: #1e40af;">${project.project_title || project.title || 'Project'}</div>
+                                                ${project.project_link ? `<div style="color: #4b5563; font-size: 12px;"><a href="${project.project_link}" style="color: #1e40af;">View Project</a></div>` : ''}
+                                            </div>
+                                            ${project.technologies_used ? `<div style="margin-top: 5px; color: #4b5563;"><strong>Technologies:</strong> ${project.technologies_used}</div>` : ''}
+                                            ${project.description ? `<div style="margin-top: 5px; color: #4b5563;">${project.description}</div>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ` : ''}
+                                
+                                <!-- Certificates Section -->
+                                ${userData.certifications && userData.certifications.length > 0 ? `
+                                <div style="margin-bottom: 25px;">
+                                    <h2 style="color: #1e40af; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">CERTIFICATES</h2>
+                                    ${userData.certifications.map(cert => `
+                                        <div style="margin-bottom: 15px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                                <div>
+                                                    <div style="font-weight: bold; color: #1e40af;">${cert.certificate_name || 'Certificate'}</div>
+                                                    <div style="color: #4b5563; font-style: italic;">${cert.issuing_organization || ''}</div>
+                                                </div>
+                                                ${cert.issue_date ? `<div style="color: #4b5563; font-size: 12px;">${new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>` : ''}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ` : ''}
+                                
+                                <!-- References Section -->
+                                ${userData.references && userData.references.length > 0 ? `
+                                <div style="margin-bottom: 25px;">
+                                    <h2 style="color: #1e40af; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">REFERENCES</h2>
+                                    ${userData.references.map(ref => `
+                                        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+                                            <div style="font-weight: bold; font-size: 15px; margin-bottom: 4px;">${ref.name || 'Reference'}</div>
+                                            ${ref.designation ? `<div style="color: #4b5563; font-style: italic; margin-bottom: 4px;">${ref.designation}</div>` : ''}
+                                            ${ref.organization ? `<div style="color: #4b5563; font-style: italic; margin-bottom: 4px;">${ref.organization}</div>` : ''}
+                                            ${ref.email ? `<div style="font-size: 13px; color: #4b5563;">Email: ${ref.email}</div>` : ''}
+                                            ${ref.phone ? `<div style="font-size: 13px; color: #4b5563;">Phone: ${ref.phone}</div>` : ''}
+                                            ${ref.contact_info ? `<div style="font-size: 13px; color: #4b5563;">${ref.contact_info}</div>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Modern Resume Template - Sidebar Layout
+            generateModernResume(userData) {
+                const formatDateRange = (startDate, endDate, isCurrent = false) => {
+                    if (!startDate) return '';
+                    const start = new Date(startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    if (isCurrent) return `${start} - Present`;
+                    if (!endDate) return start;
+                    const end = new Date(endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    return `${start} - ${end}`;
+                };
+                
+                const formatYearRange = (startYear, endYear) => {
+                    if (!startYear) return '';
+                    if (!endYear) return startYear;
+                    return startYear === endYear ? startYear : `${startYear} - ${endYear}`;
+                };
+                
+                return `
+                    <div class="pdf-content" style="background: #f9fafb; font-family: Arial, sans-serif; color: #1f2937; padding: 0; margin: 0; display: flex; box-shadow: none; border: none;">
+                        <!-- Sidebar -->
+                        <div style="width: 200px; background: #e5e7eb; padding: 20px; border-radius: 10px; margin: 20px 0 20px 20px;">
+                            <!-- Header Section -->
+                            <div style="margin-bottom: 30px;">
+                                <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 10px 0;">${userData.firstName || ''} ${userData.lastName || ''}</h1>
+                                <div style="font-size: 12px; color: #4b5563; line-height: 1.4;">
+                                    ${userData.email ? `${userData.email}<br>` : ''}${userData.phone ? `${userData.phone}<br>` : ''}${userData.address || ''}
+                                </div>
+                            </div>
+                            
+                            <!-- Skills Section -->
+                            ${userData.skills && userData.skills.length > 0 ? `
+                            <div style="margin-bottom: 25px;">
+                                <h2 style="color: #1f2937; font-size: 16px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1f2937; padding-bottom: 5px;">SKILLS</h2>
+                                <div>
+                                    ${userData.skills.map(skill => {
+                                        const skillName = typeof skill === 'object' ? (skill.skill_name || skill.name) : skill;
+                                        const proficiency = typeof skill === 'object' ? skill.proficiency_level : '';
+                                        return `<span style="display: inline-block; background: #e5e7eb; border: 1px solid #d1d5db; color: #1f2937; padding: 4px 10px; border-radius: 15px; margin: 0 5px 5px 0; font-size: 13px;">${skillName}${proficiency ? ` (${proficiency})` : ''}</span>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Languages Section -->
+                            ${userData.languages && userData.languages.length > 0 ? `
+                            <div style="margin-bottom: 25px;">
+                                <h2 style="color: #1f2937; font-size: 16px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1f2937; padding-bottom: 5px;">LANGUAGES</h2>
+                                <div>
+                                    ${userData.languages.map(lang => `
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                            <span style="font-weight: 600;">${lang.language_name || lang.name || 'Language'}</span>
+                                            ${lang.proficiency_level ? `<span style="color: #4b5563;">${lang.proficiency_level}</span>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Hobbies Section -->
+                            ${userData.hobbies && userData.hobbies.length > 0 ? `
+                            <div style="margin-bottom: 25px;">
+                                <h2 style="color: #1f2937; font-size: 16px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1f2937; padding-bottom: 5px;">HOBBIES</h2>
+                                <div>
+                                    ${userData.hobbies.map(hobby => {
+                                        const hobbyName = typeof hobby === 'object' ? (hobby.hobby_name || hobby.name) : hobby;
+                                        return `<span style="display: inline-block; background: #e5e7eb; border: 1px solid #d1d5db; color: #1f2937; padding: 4px 10px; border-radius: 15px; margin: 0 5px 5px 0; font-size: 13px;">${hobbyName}</span>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Main Content -->
+                        <div style="flex: 1; padding: 20px 20px 20px 0;">
+                            <!-- Professional Summary Section -->
+                            ${userData.objective ? `
+                            <div style="margin-bottom: 25px;">
+                                <h2 style="color: #1f2937; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1f2937; padding-bottom: 5px;">PROFESSIONAL SUMMARY</h2>
+                                <p style="margin: 0; line-height: 1.6;">${userData.objective}</p>
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Experience Section -->
+                            ${userData.experience && userData.experience.length > 0 ? `
+                            <div style="margin-bottom: 25px;">
+                                <h2 style="color: #1f2937; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1f2937; padding-bottom: 5px;">EXPERIENCE</h2>
+                                ${userData.experience.map(exp => `
+                                    <div style="margin-bottom: 15px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                            <div>
+                                                <div style="font-weight: bold; color: #1f2937;">${exp.role || exp.position || exp.title || 'Position'}</div>
+                                                <div style="color: #4b5563; font-style: italic;">${exp.company_name || exp.company || exp.organization || ''}</div>
+                                            </div>
+                                            <div style="color: #4b5563; font-size: 12px;">${formatDateRange(exp.start_date, exp.end_date, exp.is_current)}</div>
+                                        </div>
+                                        ${exp.description || exp.details ? `<div style="margin-top: 5px; color: #4b5563;">${exp.description || exp.details}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Education Section -->
+                            ${userData.education && userData.education.length > 0 ? `
+                            <div style="margin-bottom: 25px;">
+                                <h2 style="color: #1f2937; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1f2937; padding-bottom: 5px;">EDUCATION</h2>
+                                ${userData.education.map(edu => `
+                                    <div style="margin-bottom: 15px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                            <div>
+                                                <div style="font-weight: bold; color: #1f2937;">${edu.degree || edu.title || 'Degree'}</div>
+                                                <div style="color: #4b5563; font-style: italic;">${edu.institution_name || edu.institution || edu.school || ''}</div>
+                                            </div>
+                                            <div style="color: #4b5563; font-size: 12px;">${formatYearRange(edu.start_year, edu.end_year)}</div>
+                                        </div>
+                                        ${edu.grade ? `<div style="margin-top: 5px; color: #4b5563;">Grade: ${edu.grade}%</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Projects Section -->
+                            ${userData.projects && userData.projects.length > 0 ? `
+                            <div style="margin-bottom: 25px;">
+                                <h2 style="color: #1f2937; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1f2937; padding-bottom: 5px;">PROJECTS</h2>
+                                ${userData.projects.map(project => `
+                                    <div style="margin-bottom: 15px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                            <div style="font-weight: bold; color: #1f2937;">${project.project_title || project.title || 'Project'}</div>
+                                            ${project.project_link ? `<div style="color: #4b5563; font-size: 12px;"><a href="${project.project_link}" style="color: #1f2937;">View Project</a></div>` : ''}
+                                        </div>
+                                        ${project.technologies_used ? `<div style="margin-top: 5px; color: #4b5563;"><strong>Technologies:</strong> ${project.technologies_used}</div>` : ''}
+                                        ${project.description ? `<div style="margin-top: 5px; color: #4b5563;">${project.description}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Certificates Section -->
+                            ${userData.certifications && userData.certifications.length > 0 ? `
+                            <div style="margin-bottom: 25px;">
+                                <h2 style="color: #1f2937; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1f2937; padding-bottom: 5px;">CERTIFICATES</h2>
+                                ${userData.certifications.map(cert => `
+                                    <div style="margin-bottom: 15px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                            <div>
+                                                <div style="font-weight: bold; color: #1f2937;">${cert.certificate_name || 'Certificate'}</div>
+                                                <div style="color: #4b5563; font-style: italic;">${cert.issuing_organization || ''}</div>
+                                            </div>
+                                            ${cert.issue_date ? `<div style="color: #4b5563; font-size: 12px;">${new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                            
+                            <!-- References Section -->
+                            ${userData.references && userData.references.length > 0 ? `
+                            <div style="margin-bottom: 25px;">
+                                <h2 style="color: #1f2937; font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #1f2937; padding-bottom: 5px;">REFERENCES</h2>
+                                ${userData.references.map(ref => `
+                                    <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+                                        <div style="font-weight: bold; font-size: 15px; margin-bottom: 4px;">${ref.name || 'Reference'}</div>
+                                        ${ref.designation ? `<div style="color: #4b5563; font-style: italic; margin-bottom: 4px;">${ref.designation}</div>` : ''}
+                                        ${ref.organization ? `<div style="color: #4b5563; font-style: italic; margin-bottom: 4px;">${ref.organization}</div>` : ''}
+                                        ${ref.email ? `<div style="font-size: 13px; color: #4b5563;">Email: ${ref.email}</div>` : ''}
+                                        ${ref.phone ? `<div style="font-size: 13px; color: #4b5563;">Phone: ${ref.phone}</div>` : ''}
+                                        ${ref.contact_info ? `<div style="font-size: 13px; color: #4b5563;">${ref.contact_info}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Elegant Resume Template - Centered Layout
+            generateElegantResume(userData) {
+                const formatDateRange = (startDate, endDate, isCurrent = false) => {
+                    if (!startDate) return '';
+                    const start = new Date(startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    if (isCurrent) return `${start} - Present`;
+                    if (!endDate) return start;
+                    const end = new Date(endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    return `${start} - ${end}`;
+                };
+                
+                const formatYearRange = (startYear, endYear) => {
+                    if (!startYear) return '';
+                    if (!endYear) return startYear;
+                    return startYear === endYear ? startYear : `${startYear} - ${endYear}`;
+                };
+                
+                return `
+                    <div class="pdf-content" style="background: linear-gradient(to bottom, #ffffff, #f0fdf4); font-family: Georgia, serif; color: #000; padding: 0; margin: 0; max-width: 700px; margin: 0 auto; box-shadow: none; border: none;">
+                        <!-- Header Section -->
+                        <div style="text-align: center; padding: 30px 20px 20px;">
+                            <h1 style="font-size: 32px; font-weight: bold; margin: 0 0 10px 0; color: #166534; font-style: italic;">${userData.firstName || ''} ${userData.lastName || ''}</h1>
+                            <div style="font-size: 14px; color: #4b5563; margin-bottom: 20px; font-style: italic;">
+                                ${userData.email ? `${userData.email} | ` : ''}${userData.phone ? `${userData.phone} | ` : ''}${userData.address || ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Professional Summary Section -->
+                        ${userData.objective ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #166534; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #166534; padding-bottom: 5px; font-style: italic;">PROFESSIONAL SUMMARY</h2>
+                            <p style="margin: 0; line-height: 1.6; text-align: justify;">${userData.objective}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Experience Section -->
+                        ${userData.experience && userData.experience.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #166534; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #166534; padding-bottom: 5px; font-style: italic;">EXPERIENCE</h2>
+                            ${userData.experience.map(exp => `
+                                <div style="margin-bottom: 20px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <div>
+                                            <div style="font-weight: bold; color: #166534; font-size: 16px;">${exp.role || exp.position || exp.title || 'Position'}</div>
+                                            <div style="color: #4b5563; font-style: italic;">${exp.company_name || exp.company || exp.organization || ''}</div>
+                                        </div>
+                                        <div style="color: #4b5563; font-size: 12px; font-style: italic;">${formatDateRange(exp.start_date, exp.end_date, exp.is_current)}</div>
+                                    </div>
+                                    ${exp.description || exp.details ? `<div style="margin-top: 8px; color: #4b5563; text-align: justify;">${exp.description || exp.details}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Education Section -->
+                        ${userData.education && userData.education.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #166534; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #166534; padding-bottom: 5px; font-style: italic;">EDUCATION</h2>
+                            ${userData.education.map(edu => `
+                                <div style="margin-bottom: 20px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <div>
+                                            <div style="font-weight: bold; color: #166534; font-size: 16px;">${edu.degree || edu.title || 'Degree'}</div>
+                                            <div style="color: #4b5563; font-style: italic;">${edu.institution_name || edu.institution || edu.school || ''}</div>
+                                        </div>
+                                        <div style="color: #4b5563; font-size: 12px; font-style: italic;">${formatYearRange(edu.start_year, edu.end_year)}</div>
+                                    </div>
+                                    ${edu.grade ? `<div style="margin-top: 8px; color: #4b5563;">Grade: ${edu.grade}%</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Skills Section -->
+                        ${userData.skills && userData.skills.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #166534; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #166534; padding-bottom: 5px; font-style: italic;">SKILLS</h2>
+                            <div>
+                                ${userData.skills.map(skill => {
+                                    const skillName = typeof skill === 'object' ? (skill.skill_name || skill.name) : skill;
+                                    const proficiency = typeof skill === 'object' ? skill.proficiency_level : '';
+                                    return `<span style="display: inline-block; background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 6px 12px; border-radius: 20px; margin: 0 8px 8px 0; font-size: 14px;">${skillName}${proficiency ? ` (${proficiency})` : ''}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Projects Section -->
+                        ${userData.projects && userData.projects.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #166534; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #166534; padding-bottom: 5px; font-style: italic;">PROJECTS</h2>
+                            ${userData.projects.map(project => `
+                                <div style="margin-bottom: 20px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <div style="font-weight: bold; color: #166534; font-size: 16px;">${project.project_title || project.title || 'Project'}</div>
+                                        ${project.project_link ? `<div style="color: #4b5563; font-size: 12px; font-style: italic;"><a href="${project.project_link}" style="color: #166534;">View Project</a></div>` : ''}
+                                    </div>
+                                    ${project.technologies_used ? `<div style="margin-top: 8px; color: #4b5563;"><strong>Technologies:</strong> ${project.technologies_used}</div>` : ''}
+                                    ${project.description ? `<div style="margin-top: 8px; color: #4b5563; text-align: justify;">${project.description}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Certificates Section -->
+                        ${userData.certifications && userData.certifications.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #166534; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #166534; padding-bottom: 5px; font-style: italic;">CERTIFICATES</h2>
+                            ${userData.certifications.map(cert => `
+                                <div style="margin-bottom: 20px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <div>
+                                            <div style="font-weight: bold; color: #166534; font-size: 16px;">${cert.certificate_name || 'Certificate'}</div>
+                                            <div style="color: #4b5563; font-style: italic;">${cert.issuing_organization || ''}</div>
+                                        </div>
+                                        ${cert.issue_date ? `<div style="color: #4b5563; font-size: 12px; font-style: italic;">${new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Languages Section -->
+                        ${userData.languages && userData.languages.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #166534; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #166534; padding-bottom: 5px; font-style: italic;">LANGUAGES</h2>
+                            <div>
+                                ${userData.languages.map(lang => `
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding: 8px; background: rgba(22, 101, 52, 0.05); border-radius: 8px;">
+                                        <span style="font-weight: 600; color: #166534;">${lang.language_name || lang.name || 'Language'}</span>
+                                        ${lang.proficiency_level ? `<span style="color: #4b5563; font-style: italic;">${lang.proficiency_level}</span>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Hobbies Section -->
+                        ${userData.hobbies && userData.hobbies.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #166534; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #166534; padding-bottom: 5px; font-style: italic;">HOBBIES</h2>
+                            <div>
+                                ${userData.hobbies.map(hobby => {
+                                    const hobbyName = typeof hobby === 'object' ? (hobby.hobby_name || hobby.name) : hobby;
+                                    return `<span style="display: inline-block; background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 6px 12px; border-radius: 20px; margin: 0 8px 8px 0; font-size: 14px;">${hobbyName}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- References Section -->
+                        ${userData.references && userData.references.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #166534; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #166534; padding-bottom: 5px; font-style: italic;">REFERENCES</h2>
+                            ${userData.references.map(ref => `
+                                <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                                    <div style="font-weight: bold; font-size: 16px; margin-bottom: 6px; color: #166534;">${ref.name || 'Reference'}</div>
+                                    ${ref.designation ? `<div style="color: #4b5563; font-style: italic; margin-bottom: 6px;">${ref.designation}</div>` : ''}
+                                    ${ref.organization ? `<div style="color: #4b5563; font-style: italic; margin-bottom: 6px;">${ref.organization}</div>` : ''}
+                                    ${ref.email ? `<div style="font-size: 13px; color: #4b5563; margin-bottom: 4px;">Email: ${ref.email}</div>` : ''}
+                                    ${ref.phone ? `<div style="font-size: 13px; color: #4b5563; margin-bottom: 4px;">Phone: ${ref.phone}</div>` : ''}
+                                    ${ref.contact_info ? `<div style="font-size: 13px; color: #4b5563;">${ref.contact_info}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+            
+            // Professional Resume Template - Formal Layout
+            generateProfessionalResume(userData) {
+                const formatDateRange = (startDate, endDate, isCurrent = false) => {
+                    if (!startDate) return '';
+                    const start = new Date(startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    if (isCurrent) return `${start} - Present`;
+                    if (!endDate) return start;
+                    const end = new Date(endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    return `${start} - ${end}`;
+                };
+                
+                const formatYearRange = (startYear, endYear) => {
+                    if (!startYear) return '';
+                    if (!endYear) return startYear;
+                    return startYear === endYear ? startYear : `${startYear} - ${endYear}`;
+                };
+                
+                return `
+                    <div class="pdf-content" style="background: #ffffff; font-family: Arial, sans-serif; color: #000000; padding: 0; margin: 0; box-shadow: none; border: none;">
+                        <!-- Header Section -->
+                        <div style="background: #000000; color: #ffffff; padding: 20px; text-align: center; border-bottom: 3px solid #000;">
+                            <h1 style="font-size: 28px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 2px;">${userData.firstName || ''} ${userData.lastName || ''}</h1>
+                            <div style="font-size: 14px; margin-top: 5px; opacity: 0.9;">
+                                ${userData.email ? `${userData.email} | ` : ''}${userData.phone ? `${userData.phone} | ` : ''}${userData.address || ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Professional Summary Section -->
+                        ${userData.objective ? `
+                        <div style="margin-bottom: 25px; padding: 20px;">
+                            <h2 style="color: #000000; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">PROFESSIONAL SUMMARY</h2>
+                            <p style="margin: 0; line-height: 1.6; text-align: justify;">${userData.objective}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Experience Section -->
+                        ${userData.experience && userData.experience.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #000000; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">EXPERIENCE</h2>
+                            ${userData.experience.map(exp => `
+                                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e5e7eb;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <div>
+                                            <div style="font-weight: bold; color: #000000; font-size: 16px;">${exp.role || exp.position || exp.title || 'Position'}</div>
+                                            <div style="color: #4b5563; font-style: italic;">${exp.company_name || exp.company || exp.organization || ''}</div>
+                                        </div>
+                                        <div style="color: #4b5563; font-size: 12px; background: #f3f4f6; padding: 4px 8px; border-radius: 4px;">${formatDateRange(exp.start_date, exp.end_date, exp.is_current)}</div>
+                                    </div>
+                                    ${exp.description || exp.details ? `<div style="margin-top: 10px; color: #4b5563; text-align: justify;">${exp.description || exp.details}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Education Section -->
+                        ${userData.education && userData.education.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #000000; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">EDUCATION</h2>
+                            ${userData.education.map(edu => `
+                                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e5e7eb;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <div>
+                                            <div style="font-weight: bold; color: #000000; font-size: 16px;">${edu.degree || edu.title || 'Degree'}</div>
+                                            <div style="color: #4b5563; font-style: italic;">${edu.institution_name || edu.institution || edu.school || ''}</div>
+                                        </div>
+                                        <div style="color: #4b5563; font-size: 12px; background: #f3f4f6; padding: 4px 8px; border-radius: 4px;">${formatYearRange(edu.start_year, edu.end_year)}</div>
+                                    </div>
+                                    ${edu.grade ? `<div style="margin-top: 10px; color: #4b5563;">Grade: ${edu.grade}%</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Skills Section -->
+                        ${userData.skills && userData.skills.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #000000; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">SKILLS</h2>
+                            <div style="display: flex; flex-wrap: wrap;">
+                                ${userData.skills.map(skill => {
+                                    const skillName = typeof skill === 'object' ? (skill.skill_name || skill.name) : skill;
+                                    const proficiency = typeof skill === 'object' ? skill.proficiency_level : '';
+                                    return `<span style="display: inline-block; background: #ffffff; border: 1px solid #000000; color: #000000; padding: 6px 12px; border-radius: 15px; margin: 0 8px 8px 0; font-size: 13px;">${skillName}${proficiency ? ` (${proficiency})` : ''}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Projects Section -->
+                        ${userData.projects && userData.projects.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #000000; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">PROJECTS</h2>
+                            ${userData.projects.map(project => `
+                                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e5e7eb;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <div style="font-weight: bold; color: #000000; font-size: 16px;">${project.project_title || project.title || 'Project'}</div>
+                                        ${project.project_link ? `<div style="color: #4b5563; font-size: 12px; background: #f3f4f6; padding: 4px 8px; border-radius: 4px;"><a href="${project.project_link}" style="color: #000000;">View Project</a></div>` : ''}
+                                    </div>
+                                    ${project.technologies_used ? `<div style="margin-top: 10px; color: #4b5563;"><strong>Technologies:</strong> ${project.technologies_used}</div>` : ''}
+                                    ${project.description ? `<div style="margin-top: 10px; color: #4b5563; text-align: justify;">${project.description}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Certificates Section -->
+                        ${userData.certifications && userData.certifications.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #000000; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">CERTIFICATES</h2>
+                            ${userData.certifications.map(cert => `
+                                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e5e7eb;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <div>
+                                            <div style="font-weight: bold; color: #000000; font-size: 16px;">${cert.certificate_name || 'Certificate'}</div>
+                                            <div style="color: #4b5563; font-style: italic;">${cert.issuing_organization || ''}</div>
+                                        </div>
+                                        ${cert.issue_date ? `<div style="color: #4b5563; font-size: 12px; background: #f3f4f6; padding: 4px 8px; border-radius: 4px;">${new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Languages Section -->
+                        ${userData.languages && userData.languages.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #000000; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">LANGUAGES</h2>
+                            <div>
+                                ${userData.languages.map(lang => `
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding: 10px; border: 1px solid #e5e7eb; background: #f9fafb;">
+                                        <span style="font-weight: 600; color: #000000;">${lang.language_name || lang.name || 'Language'}</span>
+                                        ${lang.proficiency_level ? `<span style="color: #4b5563;">${lang.proficiency_level}</span>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Hobbies Section -->
+                        ${userData.hobbies && userData.hobbies.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px;">
+                            <h2 style="color: #000000; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">HOBBIES</h2>
+                            <div style="display: flex; flex-wrap: wrap;">
+                                ${userData.hobbies.map(hobby => {
+                                    const hobbyName = typeof hobby === 'object' ? (hobby.hobby_name || hobby.name) : hobby;
+                                    return `<span style="display: inline-block; background: #ffffff; border: 1px solid #000000; color: #000000; padding: 6px 12px; border-radius: 15px; margin: 0 8px 8px 0; font-size: 13px;">${hobbyName}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- References Section -->
+                        ${userData.references && userData.references.length > 0 ? `
+                        <div style="margin-bottom: 25px; padding: 0 20px 20px;">
+                            <h2 style="color: #000000; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">REFERENCES</h2>
+                            ${userData.references.map(ref => `
+                                <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                                    <div style="font-weight: bold; font-size: 16px; margin-bottom: 6px; color: #000000;">${ref.name || 'Reference'}</div>
+                                    ${ref.designation ? `<div style="color: #4b5563; font-style: italic; margin-bottom: 6px;">${ref.designation}</div>` : ''}
+                                    ${ref.organization ? `<div style="color: #4b5563; font-style: italic; margin-bottom: 6px;">${ref.organization}</div>` : ''}
+                                    ${ref.email ? `<div style="font-size: 13px; color: #4b5563; margin-bottom: 4px;">Email: ${ref.email}</div>` : ''}
+                                    ${ref.phone ? `<div style="font-size: 13px; color: #4b5563; margin-bottom: 4px;">Phone: ${ref.phone}</div>` : ''}
+                                    ${ref.contact_info ? `<div style="font-size: 13px; color: #4b5563;">${ref.contact_info}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+            
+            // Creative Resume Template - Split Layout
+            generateCreativeResume(userData) {
+                const formatDateRange = (startDate, endDate, isCurrent = false) => {
+                    if (!startDate) return '';
+                    const start = new Date(startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    if (isCurrent) return `${start} - Present`;
+                    if (!endDate) return start;
+                    const end = new Date(endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    return `${start} - ${end}`;
+                };
+                
+                const formatYearRange = (startYear, endYear) => {
+                    if (!startYear) return '';
+                    if (!endYear) return startYear;
+                    return startYear === endYear ? startYear : `${startYear} - ${endYear}`;
+                };
+                
+                return `
+                    <div class="pdf-content" style="background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%); font-family: Georgia, serif; color: #4c1d95; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 2fr; gap: 0; box-shadow: none; border: none;">
+                        <!-- Left Panel -->
+                        <div style="background: rgba(126, 34, 206, 0.1); padding: 30px; border-right: 1px solid rgba(126, 34, 206, 0.2);">
+                            <!-- Header Section -->
+                            <div style="margin-bottom: 30px;">
+                                <h1 style="font-size: 32px; font-weight: bold; margin: 0 0 15px 0; color: #7e22ce; border-left: 8px solid #7e22ce; padding-left: 15px;">${userData.firstName || ''} ${userData.lastName || ''}</h1>
+                                <div style="font-size: 14px; color: #4c1d95; line-height: 1.6; font-style: italic;">
+                                    ${userData.email ? `${userData.email}<br>` : ''}${userData.phone ? `${userData.phone}<br>` : ''}${userData.address || ''}
+                                </div>
+                            </div>
+                            
+                            <!-- Skills Section -->
+                            ${userData.skills && userData.skills.length > 0 ? `
+                            <div style="margin-bottom: 30px;">
+                                <h2 style="color: #7e22ce; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #7e22ce; padding-bottom: 5px; font-family: Georgia, serif;">SKILLS</h2>
+                                <div>
+                                    ${userData.skills.map(skill => {
+                                        const skillName = typeof skill === 'object' ? (skill.skill_name || skill.name) : skill;
+                                        const proficiency = typeof skill === 'object' ? skill.proficiency_level : '';
+                                        return `<span style="display: inline-block; background: #ede9fe; border: 1px solid #c4b5fd; color: #7e22ce; padding: 6px 12px; border-radius: 20px; margin: 0 8px 8px 0; font-size: 13px;">${skillName}${proficiency ? ` (${proficiency})` : ''}</span>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Languages Section -->
+                            ${userData.languages && userData.languages.length > 0 ? `
+                            <div style="margin-bottom: 30px;">
+                                <h2 style="color: #7e22ce; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #7e22ce; padding-bottom: 5px; font-family: Georgia, serif;">LANGUAGES</h2>
+                                <div>
+                                    ${userData.languages.map(lang => `
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding: 8px; background: rgba(126, 34, 206, 0.05); border-radius: 8px;">
+                                            <span style="font-weight: 600; color: #7e22ce;">${lang.language_name || lang.name || 'Language'}</span>
+                                            ${lang.proficiency_level ? `<span style="color: #4c1d95; font-style: italic;">${lang.proficiency_level}</span>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Hobbies Section -->
+                            ${userData.hobbies && userData.hobbies.length > 0 ? `
+                            <div style="margin-bottom: 30px;">
+                                <h2 style="color: #7e22ce; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #7e22ce; padding-bottom: 5px; font-family: Georgia, serif;">HOBBIES</h2>
+                                <div>
+                                    ${userData.hobbies.map(hobby => {
+                                        const hobbyName = typeof hobby === 'object' ? (hobby.hobby_name || hobby.name) : hobby;
+                                        return `<span style="display: inline-block; background: #ede9fe; border: 1px solid #c4b5fd; color: #7e22ce; padding: 6px 12px; border-radius: 20px; margin: 0 8px 8px 0; font-size: 13px;">${hobbyName}</span>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Right Panel -->
+                        <div style="padding: 30px;">
+                            <!-- Professional Summary Section -->
+                            ${userData.objective ? `
+                            <div style="margin-bottom: 30px;">
+                                <h2 style="color: #7e22ce; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #7e22ce; padding-bottom: 5px; font-family: Georgia, serif;">PROFESSIONAL SUMMARY</h2>
+                                <p style="margin: 0; line-height: 1.6; text-align: justify; color: #4c1d95;">${userData.objective}</p>
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Experience Section -->
+                            ${userData.experience && userData.experience.length > 0 ? `
+                            <div style="margin-bottom: 30px;">
+                                <h2 style="color: #7e22ce; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #7e22ce; padding-bottom: 5px; font-family: Georgia, serif;">EXPERIENCE</h2>
+                                ${userData.experience.map(exp => `
+                                    <div style="margin-bottom: 20px; padding: 15px; border-radius: 10px; background: rgba(255, 255, 255, 0.7); border-left: 4px solid #7e22ce;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                            <div>
+                                                <div style="font-weight: bold; color: #7e22ce; font-size: 16px; font-style: italic;">${exp.role || exp.position || exp.title || 'Position'}</div>
+                                                <div style="color: #4c1d95; font-style: italic;">${exp.company_name || exp.company || exp.organization || ''}</div>
+                                            </div>
+                                            <div style="color: #4c1d95; font-size: 12px; background: rgba(126, 34, 206, 0.1); padding: 4px 8px; border-radius: 4px;">${formatDateRange(exp.start_date, exp.end_date, exp.is_current)}</div>
+                                        </div>
+                                        ${exp.description || exp.details ? `<div style="margin-top: 10px; color: #4c1d95; text-align: justify;">${exp.description || exp.details}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Education Section -->
+                            ${userData.education && userData.education.length > 0 ? `
+                            <div style="margin-bottom: 30px;">
+                                <h2 style="color: #7e22ce; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #7e22ce; padding-bottom: 5px; font-family: Georgia, serif;">EDUCATION</h2>
+                                ${userData.education.map(edu => `
+                                    <div style="margin-bottom: 20px; padding: 15px; border-radius: 10px; background: rgba(255, 255, 255, 0.7); border-left: 4px solid #7e22ce;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                            <div>
+                                                <div style="font-weight: bold; color: #7e22ce; font-size: 16px; font-style: italic;">${edu.degree || edu.title || 'Degree'}</div>
+                                                <div style="color: #4c1d95; font-style: italic;">${edu.institution_name || edu.institution || edu.school || ''}</div>
+                                            </div>
+                                            <div style="color: #4c1d95; font-size: 12px; background: rgba(126, 34, 206, 0.1); padding: 4px 8px; border-radius: 4px;">${formatYearRange(edu.start_year, edu.end_year)}</div>
+                                        </div>
+                                        ${edu.grade ? `<div style="margin-top: 10px; color: #4c1d95;">Grade: ${edu.grade}%</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Projects Section -->
+                            ${userData.projects && userData.projects.length > 0 ? `
+                            <div style="margin-bottom: 30px;">
+                                <h2 style="color: #7e22ce; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #7e22ce; padding-bottom: 5px; font-family: Georgia, serif;">PROJECTS</h2>
+                                ${userData.projects.map(project => `
+                                    <div style="margin-bottom: 20px; padding: 15px; border-radius: 10px; background: rgba(255, 255, 255, 0.7); border-left: 4px solid #7e22ce;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                            <div style="font-weight: bold; color: #7e22ce; font-size: 16px; font-style: italic;">${project.project_title || project.title || 'Project'}</div>
+                                            ${project.project_link ? `<div style="color: #4c1d95; font-size: 12px; background: rgba(126, 34, 206, 0.1); padding: 4px 8px; border-radius: 4px;"><a href="${project.project_link}" style="color: #7e22ce;">View Project</a></div>` : ''}
+                                        </div>
+                                        ${project.technologies_used ? `<div style="margin-top: 10px; color: #4c1d95;"><strong>Technologies:</strong> ${project.technologies_used}</div>` : ''}
+                                        ${project.description ? `<div style="margin-top: 10px; color: #4c1d95; text-align: justify;">${project.description}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Certificates Section -->
+                            ${userData.certifications && userData.certifications.length > 0 ? `
+                            <div style="margin-bottom: 30px;">
+                                <h2 style="color: #7e22ce; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #7e22ce; padding-bottom: 5px; font-family: Georgia, serif;">CERTIFICATES</h2>
+                                ${userData.certifications.map(cert => `
+                                    <div style="margin-bottom: 20px; padding: 15px; border-radius: 10px; background: rgba(255, 255, 255, 0.7); border-left: 4px solid #7e22ce;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                            <div>
+                                                <div style="font-weight: bold; color: #7e22ce; font-size: 16px; font-style: italic;">${cert.certificate_name || 'Certificate'}</div>
+                                                <div style="color: #4c1d95; font-style: italic;">${cert.issuing_organization || ''}</div>
+                                            </div>
+                                            ${cert.issue_date ? `<div style="color: #4c1d95; font-size: 12px; background: rgba(126, 34, 206, 0.1); padding: 4px 8px; border-radius: 4px;">${new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                            
+                            <!-- References Section -->
+                            ${userData.references && userData.references.length > 0 ? `
+                            <div style="margin-bottom: 30px;">
+                                <h2 style="color: #7e22ce; font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #7e22ce; padding-bottom: 5px; font-family: Georgia, serif;">REFERENCES</h2>
+                                ${userData.references.map(ref => `
+                                    <div style="background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(126, 34, 206, 0.2); border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                                        <div style="font-weight: bold; font-size: 16px; margin-bottom: 6px; color: #7e22ce; font-style: italic;">${ref.name || 'Reference'}</div>
+                                        ${ref.designation ? `<div style="color: #4c1d95; font-style: italic; margin-bottom: 6px;">${ref.designation}</div>` : ''}
+                                        ${ref.organization ? `<div style="color: #4c1d95; font-style: italic; margin-bottom: 6px;">${ref.organization}</div>` : ''}
+                                        ${ref.email ? `<div style="font-size: 13px; color: #4c1d95; margin-bottom: 4px;">Email: ${ref.email}</div>` : ''}
+                                        ${ref.phone ? `<div style="font-size: 13px; color: #4c1d95; margin-bottom: 4px;">Phone: ${ref.phone}</div>` : ''}
+                                        ${ref.contact_info ? `<div style="font-size: 13px; color: #4c1d95;">${ref.contact_info}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Minimal Resume Template - Clean Layout
+            generateMinimalResume(userData) {
+                const formatDateRange = (startDate, endDate, isCurrent = false) => {
+                    if (!startDate) return '';
+                    const start = new Date(startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    if (isCurrent) return `${start} - Present`;
+                    if (!endDate) return start;
+                    const end = new Date(endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    return `${start} - ${end}`;
+                };
+                
+                const formatYearRange = (startYear, endYear) => {
+                    if (!startYear) return '';
+                    if (!endYear) return startYear;
+                    return startYear === endYear ? startYear : `${startYear} - ${endYear}`;
+                };
+                
+                return `
+                    <div class="pdf-content" style="background: #ffffff; font-family: Arial, sans-serif; color: #b91c1c; padding: 40px; margin: 0; max-width: 600px; box-shadow: none; border: none;">
+                        <!-- Header Section -->
+                        <div style="margin-bottom: 30px;">
+                            <h1 style="font-size: 32px; font-weight: 300; margin: 0 0 5px 0; letter-spacing: 3px; text-align: left;">${userData.firstName || ''} ${userData.lastName || ''}</h1>
+                            <div style="font-size: 14px; color: #4b5563; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px;">
+                                ${userData.email ? `${userData.email} | ` : ''}${userData.phone ? `${userData.phone} | ` : ''}${userData.address || ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Professional Summary Section -->
+                        ${userData.objective ? `
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #b91c1c; font-size: 18px; font-weight: 300; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Professional Summary</h2>
+                            <p style="margin: 0; line-height: 1.8; text-align: justify; color: #4b5563;">${userData.objective}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Experience Section -->
+                        ${userData.experience && userData.experience.length > 0 ? `
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #b91c1c; font-size: 18px; font-weight: 300; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Experience</h2>
+                            ${userData.experience.map(exp => `
+                                <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #f3f4f6;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <div>
+                                            <div style="font-weight: 300; color: #b91c1c; font-size: 16px;">${exp.role || exp.position || exp.title || 'Position'}</div>
+                                            <div style="color: #4b5563; font-style: italic;">${exp.company_name || exp.company || exp.organization || ''}</div>
+                                        </div>
+                                        <div style="color: #4b5563; font-size: 12px;">${formatDateRange(exp.start_date, exp.end_date, exp.is_current)}</div>
+                                    </div>
+                                    ${exp.description || exp.details ? `<div style="margin-top: 15px; color: #4b5563; line-height: 1.8;">${exp.description || exp.details}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Education Section -->
+                        ${userData.education && userData.education.length > 0 ? `
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #b91c1c; font-size: 18px; font-weight: 300; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Education</h2>
+                            ${userData.education.map(edu => `
+                                <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #f3f4f6;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <div>
+                                            <div style="font-weight: 300; color: #b91c1c; font-size: 16px;">${edu.degree || edu.title || 'Degree'}</div>
+                                            <div style="color: #4b5563; font-style: italic;">${edu.institution_name || edu.institution || edu.school || ''}</div>
+                                        </div>
+                                        <div style="color: #4b5563; font-size: 12px;">${formatYearRange(edu.start_year, edu.end_year)}</div>
+                                    </div>
+                                    ${edu.grade ? `<div style="margin-top: 15px; color: #4b5563;">Grade: ${edu.grade}%</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Skills Section -->
+                        ${userData.skills && userData.skills.length > 0 ? `
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #b91c1c; font-size: 18px; font-weight: 300; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Skills</h2>
+                            <div style="display: flex; flex-wrap: wrap;">
+                                ${userData.skills.map(skill => {
+                                    const skillName = typeof skill === 'object' ? (skill.skill_name || skill.name) : skill;
+                                    const proficiency = typeof skill === 'object' ? skill.proficiency_level : '';
+                                    return `<span style="display: inline-block; background: #ffffff; border: none; border-bottom: 1px solid #b91c1c; color: #b91c1c; padding: 2px 0; margin-right: 15px; margin-bottom: 10px; font-size: 14px; border-radius: 0;">${skillName}${proficiency ? ` (${proficiency})` : ''}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Projects Section -->
+                        ${userData.projects && userData.projects.length > 0 ? `
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #b91c1c; font-size: 18px; font-weight: 300; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Projects</h2>
+                            ${userData.projects.map(project => `
+                                <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #f3f4f6;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <div style="font-weight: 300; color: #b91c1c; font-size: 16px;">${project.project_title || project.title || 'Project'}</div>
+                                        ${project.project_link ? `<div style="color: #4b5563; font-size: 12px;"><a href="${project.project_link}" style="color: #b91c1c;">View Project</a></div>` : ''}
+                                    </div>
+                                    ${project.technologies_used ? `<div style="margin-top: 15px; color: #4b5563;"><strong>Technologies:</strong> ${project.technologies_used}</div>` : ''}
+                                    ${project.description ? `<div style="margin-top: 15px; color: #4b5563; line-height: 1.8;">${project.description}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Certificates Section -->
+                        ${userData.certifications && userData.certifications.length > 0 ? `
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #b91c1c; font-size: 18px; font-weight: 300; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Certificates</h2>
+                            ${userData.certifications.map(cert => `
+                                <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #f3f4f6;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <div>
+                                            <div style="font-weight: 300; color: #b91c1c; font-size: 16px;">${cert.certificate_name || 'Certificate'}</div>
+                                            <div style="color: #4b5563; font-style: italic;">${cert.issuing_organization || ''}</div>
+                                        </div>
+                                        ${cert.issue_date ? `<div style="color: #4b5563; font-size: 12px;">${new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Languages Section -->
+                        ${userData.languages && userData.languages.length > 0 ? `
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #b91c1c; font-size: 18px; font-weight: 300; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Languages</h2>
+                            <div>
+                                ${userData.languages.map(lang => `
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f3f4f6;">
+                                        <span style="font-weight: 600; color: #b91c1c;">${lang.language_name || lang.name || 'Language'}</span>
+                                        ${lang.proficiency_level ? `<span style="color: #4b5563;">${lang.proficiency_level}</span>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Hobbies Section -->
+                        ${userData.hobbies && userData.hobbies.length > 0 ? `
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #b91c1c; font-size: 18px; font-weight: 300; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Hobbies</h2>
+                            <div style="display: flex; flex-wrap: wrap;">
+                                ${userData.hobbies.map(hobby => {
+                                    const hobbyName = typeof hobby === 'object' ? (hobby.hobby_name || hobby.name) : hobby;
+                                    return `<span style="display: inline-block; background: #ffffff; border: none; border-bottom: 1px solid #b91c1c; color: #b91c1c; padding: 2px 0; margin-right: 15px; margin-bottom: 10px; font-size: 14px; border-radius: 0;">${hobbyName}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- References Section -->
+                        ${userData.references && userData.references.length > 0 ? `
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #b91c1c; font-size: 18px; font-weight: 300; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">References</h2>
+                            ${userData.references.map(ref => `
+                                <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                                    <div style="font-weight: 300; font-size: 16px; margin-bottom: 8px; color: #b91c1c;">${ref.name || 'Reference'}</div>
+                                    ${ref.designation ? `<div style="color: #4b5563; font-style: italic; margin-bottom: 8px;">${ref.designation}</div>` : ''}
+                                    ${ref.organization ? `<div style="color: #4b5563; font-style: italic; margin-bottom: 8px;">${ref.organization}</div>` : ''}
+                                    ${ref.email ? `<div style="font-size: 13px; color: #4b5563; margin-bottom: 6px;">Email: ${ref.email}</div>` : ''}
+                                    ${ref.phone ? `<div style="font-size: 13px; color: #4b5563; margin-bottom: 6px;">Phone: ${ref.phone}</div>` : ''}
+                                    ${ref.contact_info ? `<div style="font-size: 13px; color: #4b5563;">${ref.contact_info}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+       
+        // Global functions for template actions (for backward compatibility)
+        function previewResumeTemplate(templateKey) {
+            if (pageManagerInstance) {
+                pageManagerInstance.previewTemplate(templateKey);
+            } else if (window.pageManager) {
+                window.pageManager.previewTemplate(templateKey);
+            } else {
+                console.error('PageManager instance not found');
+            }
+        }
+       
+        function downloadResumeTemplate(templateKey) {
+            if (pageManagerInstance) {
+                pageManagerInstance.downloadTemplate(templateKey);
+            } else if (window.pageManager) {
+                window.pageManager.downloadTemplate(templateKey);
+            } else {
+                console.error('PageManager instance not found');
+            }
+        }
+       
+        // Listen for sidebar state changes and update main-content and header class
+        window.addEventListener('sidebarStateChanged', (event) => {
+            const mainContent = document.getElementById('main-content');
+            const topHeader = document.getElementById('top-header');
+            const { isCollapsed, isMobile } = event.detail;
+            if (mainContent) {
+                if (!isMobile) {
+                    if (isCollapsed) {
+                        mainContent.classList.add('sidebar-collapsed');
+                    } else {
+                        mainContent.classList.remove('sidebar-collapsed');
+                    }
+                } else {
+                    mainContent.classList.remove('sidebar-collapsed');
+                }
+            }
+            if (topHeader) {
+                if (!isMobile) {
+                    if (isCollapsed) {
+                        topHeader.classList.add('sidebar-collapsed');
+                    } else {
+                        topHeader.classList.remove('sidebar-collapsed');
+                    }
+                } else {
+                    topHeader.classList.remove('sidebar-collapsed');
+                }
+            }
+        });
+       
+        // Initialize modal close functionality and refresh button
+        document.addEventListener('DOMContentLoaded', function() {
+            const previewModal = document.getElementById('preview-modal');
+            const closePreviewBtn = document.getElementById('close-preview-btn');
+            const refreshDataBtn = document.getElementById('refresh-data-btn');
+           
+            // Close modal when clicking the close button
+            if (closePreviewBtn) {
+                closePreviewBtn.addEventListener('click', function() {
+                    previewModal.classList.add('hidden');
+                    document.body.style.overflow = '';
+                });
+            }
+           
+            // Refresh data button functionality
+            if (refreshDataBtn) {
+                refreshDataBtn.addEventListener('click', function() {
+                    if (pageManagerInstance) {
+                        pageManagerInstance.loadUserData();
+                        // If modal is open and a template is selected, refresh the preview
+                        if (!previewModal.classList.contains('hidden') && selectedTemplate) {
+                            setTimeout(() => {
+                                pageManagerInstance.previewTemplate(selectedTemplate);
+                            }, 100);
+                        }
+                    }
+                });
+            }
+           
+            // Close modal when clicking outside the modal content
+            if (previewModal) {
+                previewModal.addEventListener('click', function(e) {
+                    if (e.target === previewModal) {
+                        previewModal.classList.add('hidden');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+           
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !previewModal.classList.contains('hidden')) {
+                    previewModal.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+    </script>
+    
+    
+</body>
+</html>

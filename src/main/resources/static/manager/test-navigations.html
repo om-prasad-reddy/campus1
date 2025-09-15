@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Navigation Test</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="navigation.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Page-specific styles */
+    .test-content {
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin: 20px 0;
+    }
+
+    .test-content h1 {
+      color: #1e3a8a;
+      margin-bottom: 15px;
+    }
+
+    .test-content p {
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+
+  <script>
+    // Set header title when navigation is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(() => {
+        if (window.navigation) {
+          window.navigation.setHeaderTitle('Navigation Test');
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>

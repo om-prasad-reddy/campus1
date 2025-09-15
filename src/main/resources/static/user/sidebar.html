@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar - Campus1</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles for sidebar */
+        .sidebar {
+            transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+            background: linear-gradient(to bottom, #4f46e5, #7c3aed);
+        }
+        .sidebar-collapsed {
+            width: 4rem;
+        }
+        .sidebar-expanded {
+            width: 16rem;
+        }
+        .sidebar-item {
+            transition: all 0.2s ease-in-out;
+        }
+        .sidebar-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+        .sidebar-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-right: 3px solid #ffffff;
+        }
+        .sidebar-text {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .sidebar-collapsed .sidebar-text {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .sidebar-toggle {
+            position: absolute;
+            top: 16px;
+            right: -10px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(to bottom, #4f46e5, #7c3aed);
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease-in-out;
+            z-index: 50;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .sidebar-toggle:hover {
+            background: linear-gradient(to bottom, #3730a3, #6b21a8);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Icon styles */
+        .sidebar-toggle i {
+            color: white;
+            font-size: 10px;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        /* Collapsed state - move button to right edge of collapsed sidebar */
+        .sidebar-collapsed .sidebar-toggle {
+            right: -10px;
+        }
+        
+        /* Notification badge styles */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .notification-badge.hidden {
+            display: none;
+        }
+        
+        .notification-badge-profile {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+        
+        .notification-badge-profile.hidden {
+            display: none;
+        }
+        
+        /* Ensure the profile icon has position relative */
+        .sidebar-item i {
+            position: relative;
+        }
+        
+        /* Mobile overlay */
+        .sidebar-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        /* Mobile sidebar positioning */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 60; /* Higher than mobile header */
+                height: 100vh;
+                width: 16rem !important;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+                z-index: 60; /* Ensure it's above mobile header when open */
+            }
+            .sidebar-collapsed {
+                width: 16rem !important;
+            }
+            /* Adjust toggle button on mobile */
+            .sidebar-toggle {
+                right: 16px !important;
+                top: 16px !important;
+            }
+        }
+        
+        /* Additional styling for better visual appeal */
+        .sidebar-toggle:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+        }
+        
+        /* Header styles */
+        .top-header {
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid #e5e7eb;
+            transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 30;
+            margin-left: 16rem; /* Default expanded sidebar width */
+            width: calc(100% - 16rem);
+        }
+        
+        .top-header.sidebar-collapsed {
+            margin-left: 4rem; /* Collapsed sidebar width */
+            width: calc(100% - 4rem);
+        }
+        
+        /* Responsive breakpoints for different screen sizes */
+        /* Tablet/Laptop (768px - 1024px) */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .top-header {
+                margin-left: 4rem; /* Always collapsed on laptop */
+                width: calc(100% - 4rem);
+            }
+            .sidebar {
+                width: 4rem !important; /* Force collapsed on laptop */
+            }
+            .sidebar-text {
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+            .sidebar-toggle {
+                display: none; /* Hide toggle on laptop */
+            }
+        }
+        
+        /* Mobile responsive for header */
+        @media (max-width: 768px) {
+            .top-header {
+                margin-left: 0 !important;
+                width: 100% !important;
+                display: none; /* Hide desktop header on mobile */
+            }
+        }
+        
+        /* Mobile header styles */
+        .mobile-header {
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid #e5e7eb;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            height: 64px;
+            display: none; /* Hidden by default */
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex; /* Show on mobile */
+            }
+        }
+        
+        .mobile-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0 1rem;
+            height: 100%;
+        }
+        
+        .mobile-logo {
+            display: flex;
+            align-items: center;
+            space-x: 0.75rem;
+        }
+        
+        .mobile-actions {
+            display: flex;
+            align-items: center;
+            space-x: 0.5rem;
+        }
+        
+        .mobile-toggle-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            color: #6b7280;
+            transition: all 0.2s ease;
+        }
+        
+        .mobile-toggle-btn:hover {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        
+        .mobile-notification-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            color: #6b7280;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .mobile-notification-btn:hover {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Overlay for Mobile -->
+    <div id="sidebar-overlay" class="sidebar-overlay fixed inset-0 bg-black bg-opacity-50 hidden md:hidden" style="z-index: 55;"></div>
+    
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar sidebar-expanded fixed left-0 top-0 h-full text-white z-40 flex flex-col">
+        <!-- Sidebar Header -->
+        <div class="p-4 border-b border-white/20 relative">
+            <div class="flex items-center space-x-3">
+                <i data-lucide="graduation-cap" class="h-8 w-8 text-white flex-shrink-0"></i>
+                <span class="sidebar-text text-xl font-bold whitespace-nowrap">Campus1</span>
+            </div>
+            <!-- Toggle Button - positioned absolutely -->
+            <button id="sidebar-toggle" class="sidebar-toggle">
+                <i data-lucide="chevron-left" class="h-5 w-5"></i>
+            </button>
+        </div>
+        
+        <!-- Navigation Links -->
+        <nav class="flex-1 py-4">
+            <ul class="space-y-2 px-3">
+                <li>
+                    <a href="profile.html" class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-lg text-white/90 hover:text-white" data-page="profile">
+                        <div class="relative">
+                            <i data-lucide="user" class="h-5 w-5 flex-shrink-0"></i>
+                            <span class="notification-badge-profile hidden" id="profile-notification-count">0</span>
+                        </div>
+                        <span class="sidebar-text whitespace-nowrap">Profile</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="resumes.html" class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-lg text-white/90 hover:text-white" data-page="resumes">
+                        <i data-lucide="file-text" class="h-5 w-5 flex-shrink-0"></i>
+                        <span class="sidebar-text whitespace-nowrap">Resumes</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="notifications.html" class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-lg text-white/90 hover:text-white" data-page="notifications">
+                        <div class="relative">
+                            <i data-lucide="bell" class="h-5 w-5 flex-shrink-0"></i>
+                            <span class="notification-badge hidden" id="sidebar-notification-count">0</span>
+                        </div>
+                        <span class="sidebar-text whitespace-nowrap">Notifications</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="help.html" class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-lg text-white/90 hover:text-white" data-page="help">
+                        <i data-lucide="help-circle" class="h-5 w-5 flex-shrink-0"></i>
+                        <span class="sidebar-text whitespace-nowrap">Help</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Logout Button -->
+        <div class="p-3 border-t border-white/20">
+            <button id="logout-btn" 
+                    class="sidebar-item flex items-center space-x-3 px-3 py-3 rounded-lg bg-red-500 hover:bg-red-600 text-white w-full text-left cursor-pointer">
+                <i data-lucide="log-out" class="h-5 w-5 flex-shrink-0"></i>
+                <span class="sidebar-text whitespace-nowrap">Logout</span>
+            </button>
+        </div>
+    </aside>
+    
+    <!-- Desktop Header Bar -->
+    <div id="top-header" class="top-header px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900" id="welcome-message">Welcome back!</h1>
+                <p class="text-gray-600 mt-1" id="header-subtitle">Here's what's happening with your learning today</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-2">
+                    <i data-lucide="calendar" class="h-4 w-4 text-gray-500"></i>
+                    <span class="text-sm text-gray-700" id="current-date"></span>
+                </div>
+                <button class="p-2 text-gray-400 hover:text-gray-600 relative" id="notification-btn">
+                    <i data-lucide="bell" class="h-5 w-5"></i>
+                    <span class="notification-badge hidden" id="desktop-notification-count">0</span>
+                </button>
+            </div>
+        </div>
+    </div>  
+    
+    <!-- Mobile Header Bar -->
+    <div id="mobile-header" class="mobile-header">
+        <div class="mobile-header-content">
+            <!-- Logo Section -->
+            <div class="mobile-logo">
+                <i data-lucide="graduation-cap" class="h-8 w-8 text-indigo-600"></i>
+                <span class="text-xl font-bold text-gray-900">Campus1</span>
+            </div>
+            
+            <!-- Actions Section -->
+            <div class="mobile-actions">
+                <!-- Notification Button -->
+                <button class="mobile-notification-btn" id="mobile-notification-btn">
+                    <i data-lucide="bell" class="h-6 w-6"></i>
+                    <span class="notification-badge hidden" id="mobile-notification-count">0</span>
+                </button>
+                
+                <!-- Mobile Sidebar Toggle -->
+                <button class="mobile-toggle-btn" id="mobile-sidebar-toggle">
+                    <i data-lucide="menu" class="h-6 w-6"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global logout function
+        function performLogout(e) {
+            // Prevent default behavior
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            console.log('Logout function called');
+            
+            // Clear all user data from both storage types
+            localStorage.removeItem("loggedInUser");
+            localStorage.removeItem("persistentLogin");
+            sessionStorage.removeItem("loggedInUser");
+            sessionStorage.removeItem("userId");
+            localStorage.removeItem("registeredUser");
+            localStorage.removeItem("tempGoogleUser");
+            
+            // Clear any other user-related data that might exist
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.includes('user') || key.includes('auth') || key.includes('token') || key.includes('login')) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key.includes('user') || key.includes('auth') || key.includes('token') || key.includes('login')) {
+                    sessionStorage.removeItem(key);
+                }
+            }
+            
+            // Set logout flags to prevent automatic login
+            sessionStorage.setItem('logoutFlag', 'true');
+            localStorage.setItem('logoutFlag', 'true');
+            
+            console.log('User data cleared, redirecting to login page');
+            
+            // Force redirect to login page with cache busting
+            const timestamp = new Date().getTime();
+            window.location.replace("user/login.html?t=" + timestamp + "&logout=true");
+        }
+        
+        // Function to update notification badge count
+        function updateNotificationBadge(count) {
+            // Desktop and mobile badges
+            const desktopBadge = document.getElementById('desktop-notification-count');
+            const mobileBadge = document.getElementById('mobile-notification-count');
+            const sidebarBadge = document.getElementById('sidebar-notification-count');
+            
+            if (count > 0) {
+                if (desktopBadge) {
+                    desktopBadge.textContent = count > 99 ? '99+' : count;
+                    desktopBadge.classList.remove('hidden');
+                }
+                if (mobileBadge) {
+                    mobileBadge.textContent = count > 99 ? '99+' : count;
+                    mobileBadge.classList.remove('hidden');
+                }
+                if (sidebarBadge) {
+                    sidebarBadge.textContent = count > 99 ? '99+' : count;
+                    sidebarBadge.classList.remove('hidden');
+                }
+            } else {
+                if (desktopBadge) desktopBadge.classList.add('hidden');
+                if (mobileBadge) mobileBadge.classList.add('hidden');
+                if (sidebarBadge) sidebarBadge.classList.add('hidden');
+            }
+        }
+        
+        // Function to update profile notification badge
+        function updateProfileNotificationBadge(count) {
+            const profileBadge = document.getElementById('profile-notification-count');
+            if (profileBadge) {
+                if (count > 0) {
+                    profileBadge.textContent = count > 9 ? '9+' : count;
+                    profileBadge.classList.remove('hidden');
+                } else {
+                    profileBadge.classList.add('hidden');
+                }
+            }
+        }
+        
+        // Function to fetch notification count
+        function fetchNotificationCount() {
+            // Check if user is logged in
+            let loggedInUser = sessionStorage.getItem('loggedInUser') || localStorage.getItem('persistentLogin');
+            
+            if (!loggedInUser) {
+                updateNotificationBadge(0);
+                updateProfileNotificationBadge(0);
+                return;
+            }
+            
+            try {
+                const user = JSON.parse(loggedInUser);
+                const userId = user.id;
+                
+                if (!userId) {
+                    updateNotificationBadge(0);
+                    updateProfileNotificationBadge(0);
+                    return;
+                }
+                
+                // Check if the global fetchNotificationCounts function is available
+                if (typeof window.fetchNotificationCounts === 'function') {
+                    // Use the function from notification.js if available
+                    window.fetchNotificationCounts().then(() => {
+                        // After fetching, get the count and update profile badge
+                        const desktopBadge = document.getElementById('desktop-notification-count');
+                        const count = desktopBadge && !desktopBadge.classList.contains('hidden') 
+                            ? parseInt(desktopBadge.textContent) || 0 
+                            : 0;
+                        updateProfileNotificationBadge(count);
+                    }).catch(error => {
+                        console.error('Error using fetchNotificationCounts:', error);
+                        updateNotificationBadge(0);
+                        updateProfileNotificationBadge(0);
+                    });
+                } else {
+                    // Fallback to our own implementation
+                    const headers = new Headers();
+                    headers.append('X-User-Id', userId.toString());
+                    
+                    // Fetch notification counts
+                    fetch('http://localhost:8081/api/user/notifications/counts', { headers })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            const count = data.unread || 0;
+                            updateNotificationBadge(count);
+                            updateProfileNotificationBadge(count);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching notification count:', error);
+                            updateNotificationBadge(0);
+                            updateProfileNotificationBadge(0);
+                        });
+                }
+            } catch (e) {
+                console.error('Error parsing user data:', e);
+                updateNotificationBadge(0);
+                updateProfileNotificationBadge(0);
+            }
+        }
+        
+        // Sidebar functionality
+        class SidebarManager {
+            constructor() {
+                this.sidebar = document.getElementById('sidebar');
+                this.sidebarToggle = document.getElementById('sidebar-toggle');
+                this.sidebarOverlay = document.getElementById('sidebar-overlay');
+                this.logoutBtn = document.getElementById('logout-btn');
+                this.mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+                this.mobileNotificationBtn = document.getElementById('mobile-notification-btn');
+                this.desktopNotificationBtn = document.getElementById('notification-btn');
+                this.isCollapsed = false;
+                this.isMobile = window.innerWidth <= 768;
+                this.isLaptop = window.innerWidth > 768 && window.innerWidth <= 1024;
+                this.isDesktop = window.innerWidth > 1024;
+                
+                this.init();
+            }
+            
+            init() {
+                // Set initial state based on screen size
+                this.handleResize();
+                
+                // Set initial icon based on state
+                if (this.isDesktop) {
+                    const savedState = localStorage.getItem('sidebarCollapsed');
+                    this.isCollapsed = savedState === 'true';
+                    this.updateToggleIcon(this.isCollapsed ? 'chevron-right' : 'chevron-left');
+                } else if (this.isLaptop) {
+                    // Force collapsed state on laptop
+                    this.isCollapsed = true;
+                    this.updateToggleIcon('chevron-right');
+                }
+                
+                // Event listeners
+                this.sidebarToggle.addEventListener('click', () => this.toggleSidebar());
+                this.sidebarOverlay.addEventListener('click', () => this.closeMobileSidebar());
+                
+                // Handle logout button click
+                if (this.logoutBtn) {
+                    // Add event listener to handle logout
+                    this.logoutBtn.addEventListener('click', performLogout);
+                    
+                    // Also handle with mousedown to catch it early
+                    this.logoutBtn.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        performLogout(e);
+                    });
+                }
+                
+                // Mobile header event listeners
+                if (this.mobileSidebarToggle) {
+                    this.mobileSidebarToggle.addEventListener('click', () => this.toggleSidebar());
+                }
+                
+                // Notification button event listeners
+                if (this.mobileNotificationBtn) {
+                    this.mobileNotificationBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Mobile notification button clicked');
+                        this.handleNotificationClick();
+                    });
+                }
+                
+                if (this.desktopNotificationBtn) {
+                    this.desktopNotificationBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Desktop notification button clicked');
+                        this.handleNotificationClick();
+                    });
+                }
+                
+                // Window resize handler
+                window.addEventListener('resize', () => this.handleResize());
+                
+                // Set active page
+                this.setActivePage();
+                
+                // Update current date
+                this.updateCurrentDate();
+                
+                // Fetch notification count
+                fetchNotificationCount();
+                
+                // Initialize icons
+                lucide.createIcons();
+                
+                // Dispatch an event to indicate that the sidebar is loaded
+                window.dispatchEvent(new CustomEvent('sidebarLoaded'));
+            }
+            
+            toggleSidebar() {
+                if (this.isMobile) {
+                    this.toggleMobileSidebar();
+                } else if (this.isLaptop) {
+                    // No toggle functionality on laptop - always collapsed
+                    return;
+                } else if (this.isDesktop) {
+                    this.toggleDesktopSidebar();
+                }
+            }
+            
+            toggleDesktopSidebar() {
+                this.isCollapsed = !this.isCollapsed;
+                
+                if (this.isCollapsed) {
+                    this.sidebar.classList.remove('sidebar-expanded');
+                    this.sidebar.classList.add('sidebar-collapsed');
+                    // Change icon to right arrow for expand
+                    this.updateToggleIcon('chevron-right');
+                } else {
+                    this.sidebar.classList.remove('sidebar-collapsed');
+                    this.sidebar.classList.add('sidebar-expanded');
+                    // Change icon to left arrow for collapse
+                    this.updateToggleIcon('chevron-left');
+                }
+                
+                // Notify main content to adjust
+                this.notifyMainContent();
+                
+                // Save state
+                localStorage.setItem('sidebarCollapsed', this.isCollapsed);
+            }
+            
+            updateToggleIcon(iconName) {
+                const icon = this.sidebarToggle.querySelector('i');
+                if (icon) {
+                    icon.setAttribute('data-lucide', iconName);
+                    // Re-initialize the specific icon
+                    lucide.createIcons();
+                }
+            }
+            
+            toggleMobileSidebar() {
+                const isOpen = this.sidebar.classList.contains('mobile-open');
+                
+                if (isOpen) {
+                    this.closeMobileSidebar();
+                } else {
+                    this.openMobileSidebar();
+                }
+            }
+            
+            openMobileSidebar() {
+                this.sidebar.classList.add('mobile-open');
+                this.sidebarOverlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            closeMobileSidebar() {
+                this.sidebar.classList.remove('mobile-open');
+                this.sidebarOverlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+            
+            handleResize() {
+                const wasMobile = this.isMobile;
+                const wasLaptop = this.isLaptop;
+                const wasDesktop = this.isDesktop;
+                
+                // Update screen size flags
+                this.isMobile = window.innerWidth <= 768;
+                this.isLaptop = window.innerWidth > 768 && window.innerWidth <= 1024;
+                this.isDesktop = window.innerWidth > 1024;
+                
+                // Handle transitions between different screen sizes
+                if (wasMobile !== this.isMobile || wasLaptop !== this.isLaptop || wasDesktop !== this.isDesktop) {
+                    // Clean up previous state
+                    this.sidebar.classList.remove('mobile-open', 'sidebar-collapsed', 'sidebar-expanded');
+                    this.sidebarOverlay.classList.add('hidden');
+                    document.body.style.overflow = '';
+                    
+                    if (this.isMobile) {
+                        // Mobile: sidebar hidden by default
+                        // No additional classes needed
+                    } else if (this.isLaptop) {
+                        // Laptop: always collapsed
+                        this.isCollapsed = true;
+                        this.sidebar.classList.add('sidebar-collapsed');
+                        this.updateToggleIcon('chevron-right');
+                    } else if (this.isDesktop) {
+                        // Desktop: restore saved state or default to expanded
+                        const savedState = localStorage.getItem('sidebarCollapsed');
+                        this.isCollapsed = savedState === 'true';
+                        
+                        if (this.isCollapsed) {
+                            this.sidebar.classList.add('sidebar-collapsed');
+                            this.updateToggleIcon('chevron-right');
+                        } else {
+                            this.sidebar.classList.add('sidebar-expanded');
+                            this.updateToggleIcon('chevron-left');
+                        }
+                    }
+                    
+                    this.notifyMainContent();
+                }
+            }
+            
+            setActivePage() {
+                const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+                const pageMap = {
+                    'dashboard.html': 'dashboard',
+                    'profile.html': 'profile',
+                    'resumes.html': 'resumes',
+                    'notifications.html': 'notifications',
+                    'ticket.html': 'ticket',
+                    'help.html': 'help'
+                };
+                
+                const activePage = pageMap[currentPage];
+                if (activePage) {
+                    const activeLink = document.querySelector(`[data-page="${activePage}"]`);
+                    if (activeLink) {
+                        activeLink.classList.add('active');
+                    }
+                }
+            }
+            
+            notifyMainContent() {
+                // Update header position based on sidebar state
+                const header = document.getElementById('top-header');
+                if (header) {
+                    if (this.isMobile) {
+                        header.classList.remove('sidebar-collapsed');
+                    } else if (this.isLaptop || this.isCollapsed) {
+                        header.classList.add('sidebar-collapsed');
+                    } else {
+                        header.classList.remove('sidebar-collapsed');
+                    }
+                }
+                
+                // Dispatch custom event to notify main content of sidebar state change
+                const event = new CustomEvent('sidebarStateChanged', {
+                    detail: {
+                        isCollapsed: this.isCollapsed,
+                        isMobile: this.isMobile,
+                        isLaptop: this.isLaptop,
+                        isDesktop: this.isDesktop
+                    }
+                });
+                window.dispatchEvent(event);
+            }
+            
+            // Public method to toggle sidebar from external scripts
+            toggle() {
+                this.toggleSidebar();
+            }
+            
+            // Public method to get current state
+            getState() {
+                return {
+                    isCollapsed: this.isCollapsed,
+                    isMobile: this.isMobile
+                };
+            }
+            
+            // Public methods to update header content
+            updateWelcomeMessage(message) {
+                const welcomeElement = document.getElementById('welcome-message');
+                if (welcomeElement) {
+                    welcomeElement.textContent = message;
+                }
+            }
+            
+            updateHeaderSubtitle(subtitle) {
+                const subtitleElement = document.getElementById('header-subtitle');
+                if (subtitleElement) {
+                    subtitleElement.textContent = subtitle;
+                }
+            }
+            
+            updateCurrentDate() {
+                const dateElement = document.getElementById('current-date');
+                if (dateElement) {
+                    const now = new Date();
+                    const options = { 
+                        weekday: 'short', 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    };
+                    dateElement.textContent = now.toLocaleDateString('en-US', options);
+                }
+            }
+            
+            // Handle notification button click
+            handleNotificationClick() {
+                console.log('Notification button clicked, redirecting to notifications page');
+                // Navigate to notifications page
+                window.location.href = 'notifications.html';
+            }
+        }
+        
+        // Initialize sidebar when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            window.sidebarManager = new SidebarManager();
+            
+            // Global event listener for logout button
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('#logout-btn')) {
+                    performLogout(e);
+                }
+            });
+            
+            // Also listen for mousedown events to catch it early
+            document.addEventListener('mousedown', function(e) {
+                if (e.target.closest('#logout-btn')) {
+                    performLogout(e);
+                }
+            });
+            
+            // Set up periodic refresh of notification count (every 5 minutes)
+            setInterval(fetchNotificationCount, 300000);
+        });
+        
+        // Fallback for notification button clicks using event delegation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle notification button clicks
+            document.addEventListener('click', function(e) {
+                // Check if the clicked element is the notification button or contains it
+                if (e.target.closest('#notification-btn') || e.target.closest('#mobile-notification-btn')) {
+                    console.log('Notification button clicked via event delegation');
+                    window.location.href = 'notifications.html';
+                }
+            });
+        });
+        
+        // Export for use in other scripts
+        window.SidebarManager = SidebarManager;
+        
+        // Make the logout function globally available
+        window.performLogout = performLogout;
+        
+        // Make updateNotificationBadge globally available for other scripts to call
+        window.updateNotificationBadge = updateNotificationBadge;
+        
+        // Make updateProfileNotificationBadge globally available
+        window.updateProfileNotificationBadge = updateProfileNotificationBadge;
+    </script>
+</body>
+</html>

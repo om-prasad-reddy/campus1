@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Sidebar Test - Campus1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Test styles to visualize the responsive behavior */
+        .screen-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            z-index: 1000;
+        }
+        
+        .test-content {
+            padding: 20px;
+            background: #f0f9ff;
+            border: 2px dashed #3b82f6;
+            margin: 20px;
+            border-radius: 8px;
+        }
+        
+        .sidebar-state {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Screen size indicator -->
+    <div class="screen-info" id="screenInfo">
+        Screen: <span id="screenSize"></span><br>
+        Width: <span id="screenWidth"></span>px<br>
+        Sidebar: <span id="sidebarState"></span>
+    </div>
+
+    <!-- Load sidebar -->
+    <div id="sidebar-container"></div>
+    
+    <!-- Main content -->
+    <div id="main-content" class="main-content">
+        <div class="test-content">
+            <h1 class="text-3xl font-bold text-blue-600 mb-4">Responsive Sidebar Test</h1>
+            <p class="mb-4">This page tests the responsive sidebar functionality across different screen sizes:</p>
+            
+            <div class="sidebar-state">
+                <h2 class="text-xl font-semibold mb-2">Expected Behavior:</h2>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>Desktop (>1024px):</strong> Sidebar can be toggled between expanded/collapsed</li>
+                    <li><strong>Laptop (769px-1024px):</strong> Sidebar is always collapsed, toggle disabled</li>
+                    <li><strong>Mobile (≤768px):</strong> Sidebar slides in/out from left, overlay when open</li>
+                </ul>
+            </div>
+            
+            <div class="test-content">
+                <h2 class="text-xl font-semibold mb-2">Test Instructions:</h2>
+                <ol class="list-decimal list-inside space-y-2">
+                    <li>Resize your browser window to different widths</li>
+                    <li>Observe the sidebar behavior at each breakpoint</li>
+                    <li>Try clicking the toggle button at different screen sizes</li>
+                    <li>Check that main content adjusts properly</li>
+                </ol>
+            </div>
+            
+            <div class="bg-green-100 border border-green-400 p-4 rounded mt-4">
+                <h3 class="font-semibold text-green-800">Current Status:</h3>
+                <p id="statusText" class="text-green-700">Initializing...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load sidebar dynamically
+        fetch('user/sidebar.html')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                const overlay = doc.getElementById('sidebar-overlay');
+                const sidebar = doc.getElementById('sidebar');
+                const header = doc.getElementById('top-header');
+                const mobileHeader = doc.getElementById('mobile-header');
+                const style = doc.querySelector('style');
+                
+                if (style) {
+                    document.head.appendChild(style);
+                }
+                
+                const container = document.getElementById('sidebar-container');
+                if (overlay) container.appendChild(overlay);
+                if (sidebar) container.appendChild(sidebar);
+                
+                if (header) {
+                    document.body.insertBefore(header, document.getElementById('main-content'));
+                }
+                if (mobileHeader) {
+                    document.body.insertBefore(mobileHeader, document.getElementById('main-content'));
+                }
+                
+                // Initialize icons
+                lucide.createIcons();
+                
+                // Start monitoring
+                startMonitoring();
+            })
+            .catch(error => {
+                console.error('Error loading sidebar:', error);
+                document.getElementById('statusText').textContent = 'Error loading sidebar: ' + error.message;
+            });
+
+        function startMonitoring() {
+            const screenSizeEl = document.getElementById('screenSize');
+            const screenWidthEl = document.getElementById('screenWidth');
+            const sidebarStateEl = document.getElementById('sidebarState');
+            const statusTextEl = document.getElementById('statusText');
+            
+            function updateScreenInfo() {
+                const width = window.innerWidth;
+                screenWidthEl.textContent = width;
+                
+                let screenType, expectedBehavior;
+                if (width <= 768) {
+                    screenType = 'Mobile';
+                    expectedBehavior = 'Slide in/out with overlay';
+                } else if (width <= 1024) {
+                    screenType = 'Laptop';
+                    expectedBehavior = 'Always collapsed, no toggle';
+                } else {
+                    screenType = 'Desktop';
+                    expectedBehavior = 'Toggleable expand/collapse';
+                }
+                
+                screenSizeEl.textContent = screenType;
+                sidebarStateEl.textContent = expectedBehavior;
+                
+                statusTextEl.textContent = `Screen detected as ${screenType} (${width}px). Expected: ${expectedBehavior}`;
+            }
+            
+            // Listen for sidebar state changes
+            window.addEventListener('sidebarStateChanged', (event) => {
+                const { isCollapsed, isMobile, isLaptop, isDesktop } = event.detail;
+                console.log('Sidebar state changed:', { isCollapsed, isMobile, isLaptop, isDesktop });
+                
+                let actualState = '';
+                if (isMobile) actualState = 'Mobile mode';
+                else if (isLaptop) actualState = 'Laptop mode (collapsed)';
+                else if (isDesktop) actualState = isCollapsed ? 'Desktop collapsed' : 'Desktop expanded';
+                
+                sidebarStateEl.textContent = actualState;
+                statusTextEl.textContent = `Current state: ${actualState}`;
+            });
+            
+            // Update on resize
+            window.addEventListener('resize', updateScreenInfo);
+            
+            // Initial update
+            updateScreenInfo();
+            
+            setTimeout(() => {
+                statusTextEl.textContent = 'Monitoring active. Resize window to test responsiveness.';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

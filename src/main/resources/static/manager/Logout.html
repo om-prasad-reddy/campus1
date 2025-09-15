@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Campus1 - Logout</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+  <script src="navigation.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Page-specific styles */
+
+    .main-content {
+      position: absolute;
+      top: 60px;
+      left: 240px;
+      right: 0;
+      bottom: 0;
+      padding: 40px;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logout-box {
+      background-color: #ffffff;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .logout-box h3 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #1e3a8a;
+    }
+
+    .logout-box p {
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+
+    .logout-box button {
+      padding: 10px 24px;
+      margin: 0 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: bold;
+    }
+
+    .logout-box button:first-child {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    .logout-box button:first-child:hover {
+      background-color: #2563eb;
+    }
+
+    .logout-box button:last-child {
+      background-color: #e5e7eb;
+      color: #374151;
+    }
+
+    .logout-box button:last-child:hover {
+      background-color: #d1d5db;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-content">
+    <div class="logout-box">
+      <h3>Logout</h3>
+      <p>Are you sure you want to logout?</p>
+      <button onclick="logOut()">Confirm Logout</button>
+      <button onclick="window.location.href='user.html'">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    
+    function logOut(){
+    	localStorage.clear();
+    	window.location.href='Login.html'
+    }
+  </script>
+</body>
+</html>

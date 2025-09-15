@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus1</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(90deg, #6b46c1, #4c51bf);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 20%;
+            width: 80%;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: 60px;
+        }
+        .header .logo {
+            display: flex;
+            align-items: center;
+        }
+        .header .logo i {
+            font-size: 28px;
+            margin-right: 12px;
+            color: #60a5fa;
+        }
+        .header .logo span {
+            font-size: 28px;
+            font-weight: bold;
+            color: #f472b6;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .header .user-info .avatar {
+            background-color: #f59e0b;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+        .header .user-info .avatar i {
+            color: white;
+            font-size: 16px;
+        }
+        .header .user-info .name {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .header .user-info .welcome {
+            font-size: 14px;
+            color: #d1d5db;
+        }
+        .header .date-time {
+            background-color: #34d399;
+            padding: 8px 15px;
+            border-radius: 18px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            font-weight: 500;
+        }
+        .header .date-time i {
+            margin-right: 5px;
+        }
+        .sidebar {
+            width: 20%;
+            background: linear-gradient(180deg, #3b82f6, #2563eb);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            padding-top: 25px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+            z-index: 900;
+        }
+        .sidebar h2 {
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            margin: 0 0 30px 0;
+            padding: 0 20px;
+            color: #f1f5f9;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+        }
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: white;
+            padding: 16px 25px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            margin: 2px 0;
+        }
+        .sidebar a i {
+            margin-right: 15px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .sidebar a:hover {
+            background: linear-gradient(90deg, #1e40af, #2563eb);
+            border-left: 4px solid #60a5fa;
+            padding-left: 30px;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+        .sidebar a:hover i {
+            transform: scale(1.2);
+            color: #60a5fa;
+        }
+        .sidebar a:active {
+            background: linear-gradient(90deg, #1e3a8a, #1e40af);
+            transform: translateX(2px);
+        }
+        .main-content {
+            margin-left: 20%;
+            padding: 90px 30px 30px;
+            background-color: #f5f7fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <span>Campus1</span>
+        </div>
+        <div class="date-time">
+            <i class="fas fa-check-circle"></i>
+            <span id="current-datetime">07/29/2025, 03:49 PM</span>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h2>Admin Dashboard</h2>
+        <a href="/admin/admin_profile.html"><i class="fas fa-user-shield"></i> Admin Profile</a>
+        <a href="/admin/resume_users_data.html"><i class="fas fa-file-alt"></i> Task</a>
+          <a href="/admin/notifications.html"><i class="fas fa-bell"></i> Notifications</a>
+          <a href="/admin/ticket.html"><i class="fas fa-ticket-alt"></i>Ticket</a>
+        <a href="/admin/logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <script>
+        // Function to update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            };
+            const dateTimeString = now.toLocaleDateString('en-US', options).replace(',', ',');
+            document.getElementById('current-datetime').textContent = dateTimeString;
+        }
+
+        // Update time immediately and then every minute
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+    </script>
+</body>
+</html>

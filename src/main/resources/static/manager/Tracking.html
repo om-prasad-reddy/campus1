@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Candidate Tracking</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+	<script src="navigation.js"></script>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			overflow-x: hidden;
+			-ms-overflow-style: none;
+			scrollbar-width: none;
+		}
+
+		.tabs {
+			display: flex;
+			padding: 20px 0 0 0;
+			gap: 10px;
+			margin-bottom: 20px;
+		}
+
+		.tab-btn {
+			padding: 14px 30px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			font-weight: bold;
+			font-size: 16px;
+			transition: all 0.3s;
+		}
+
+		.tab-btn.active {
+			background-color: #3b82f6;
+			color: white;
+		}
+
+		.tab-btn:not(.active) {
+			background-color: #e5e7eb;
+			color: #4b5563;
+		}
+
+		.tab-btn:not(.active):hover {
+			background-color: #d1d5db;
+		}
+
+		.main {
+			overflow-y: auto;
+		}
+
+		.content-area {
+			margin-top: 20px;
+		}
+
+		h2 {
+			margin: 20px 0;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			background-color: white;
+			margin-bottom: 30px;
+			border-radius: 10px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+		}
+
+		th,
+		td {
+			padding: 14px 16px;
+			text-align: left;
+			border-bottom: 1px solid #e5e7eb;
+		}
+
+		th {
+			background-color: #3b82f6;
+			color: white;
+		}
+
+		tr:hover td {
+			background-color: #f1f5f9;
+		}
+
+		select {
+			width: 100%;
+			padding: 4px;
+			margin-top: 4px;
+			border-radius: 4px;
+			border: 1px solid #cbd5e1;
+		}
+
+		.search-box {
+			padding: 10px 14px;
+			width: 320px;
+			border: 1px solid #d1d5db;
+			border-radius: 8px;
+			font-size: 16px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+			margin-bottom: 15px;
+			transition: all 0.2s ease;
+		}
+
+		/* Details Modal Styles */
+		.details-modal {
+			display: none;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: #f8fafc;
+			border-radius: 12px;
+			box-shadow: 0 8px 32px rgba(60, 90, 150, 0.18);
+			border: 1px solid #e5e7eb;
+			padding: 0;
+			z-index: 1001;
+			min-width: 370px;
+			max-width: 95vw;
+			max-height: 90vh;
+			overflow-y: auto;
+		}
+
+		.details-modal.active {
+			display: block;
+		}
+
+		.details-modal .modal-header {
+			background: #3b82f6;
+			color: white;
+			padding: 18px 32px 14px 32px;
+			border-top-left-radius: 12px;
+			border-top-right-radius: 12px;
+			font-size: 18px;
+			font-weight: 600;
+			letter-spacing: 0.5px;
+			position: relative;
+		}
+
+		.details-modal .close-btn {
+			position: absolute;
+			top: 16px;
+			right: 24px;
+			background: none;
+			border: none;
+			font-size: 24px;
+			cursor: pointer;
+			color: white;
+			font-weight: bold;
+		}
+
+		.details-fields {
+			padding: 28px 32px 24px 32px;
+			background: #fff;
+			border-bottom-left-radius: 12px;
+			border-bottom-right-radius: 12px;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 18px 32px;
+		}
+
+		.details-fields div {
+			background: #f1f5f9;
+			border-radius: 6px;
+			padding: 10px 14px;
+			font-size: 16px;
+			box-shadow: 0 1px 2px rgba(60, 90, 150, 0.04);
+			display: flex;
+			flex-direction: column;
+		}
+
+		.details-fields strong {
+			color: #2563eb;
+			font-size: 15px;
+			margin-bottom: 2px;
+			font-weight: 500;
+		}
+
+		.view-btn {
+			padding: 5px 10px;
+			background: #007bff;
+			color: white;
+			border: none;
+			cursor: pointer;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="main">
+		<div class="tabs">
+			<button class="tab-btn active" onclick="showTab('assigned')">Assigned</button>
+			<button class="tab-btn" onclick="showTab('fileClosed')">File Closed</button>
+		</div>
+
+		<input type="text" id="searchInput" placeholder="Search by Admin Name" class="search-box"
+			onkeyup="applyFilters()" />
+
+
+		<div class="content-area">
+			<h2 id="tabTitle">Assigned Resumes</h2>
+
+			<!-- Assigned Table -->
+			<table id="assignedTable">
+				<thead>
+					<tr>
+						<th>S.No</th>
+						<th>User Name</th>
+						<th>User Email</th>
+						<th>Admin Name<br>
+						<th>Qualification</th>
+						<th>Phone</th>
+
+						<th>
+							Calling Status<br>
+							<select id="filterCallingStatus" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>
+							Answered Call<br>
+							<select id="filterAnsweredCall" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>
+							Looking For Job<br>
+							<select id="filterLookingForJob" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>
+							Eligible For Client<br>
+							<select id="filterEligibleForClient" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>
+							Telephonic Interview<br>
+							<select id="filterTelephoneInterview" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>
+							HR Interview<br>
+							<select id="filterHrInterview" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>
+							Operation Round<br>
+							<select id="filterOperationRound" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>
+							Versant Voice<br>
+							<select id="filterVersantVoice" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>
+							Documentation<br>
+							<select id="filterDocumentation" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>
+							Offer Letter<br>
+							<select id="filterOfferLetter" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>
+							Joining<br>
+							<select id="filterJoining" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>FinalStatus<br>
+							<select id="filterFinalStatus" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+
+			<!-- Closed Table -->
+			<table id="closedTable" style="display: none;">
+				<thead>
+					<tr>
+						<th>S.No</th>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Admin</th>
+						<th>Qualification</th>
+						<th>Phone</th>
+						<th>Calling Status<br>
+							<select id="filterCallingStatusClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>Answered Call<br>
+							<select id="filterAnsweredCallClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>Looking For Job<br>
+							<select id="filterLookingForJobClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>Eligible For Client<br>
+							<select id="filterEligibleForClientClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>Telephonic Interview<br>
+							<select id="filterTelephoneInterviewClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>HR Interview<br>
+							<select id="filterHrInterviewClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>Operation Round<br>
+							<select id="filterOperationRoundClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>Versant Voice<br>
+							<select id="filterVersantVoiceClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>Documentation<br>
+							<select id="filterDocumentationClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>Offer Letter<br>
+							<select id="filterOfferLetterClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>Joining<br>
+							<select id="filterJoiningClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+						<th>FinalStatus<br>
+							<select id="filterFinalStatusClosed" onchange="applyFilters()">
+								<option value="">All</option>
+							</select>
+						</th>
+
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+			<!-- Details Modal -->
+			<div class="details-modal" id="detailsModal">
+				<div class="modal-header">
+					Resume Details
+					<button class="close-btn" onclick="closeDetailsModal()">&times;</button>
+				</div>
+				<div class="details-fields" id="detailsFields"></div>
+			</div>
+		</div>
+	</div>
+	<script>
+		/* -------------------------------
+		   PAGE INITIALIZATION
+		--------------------------------*/
+		document.addEventListener("DOMContentLoaded", () => {
+			const user = localStorage.getItem("managerEmail");
+			// ✅ Immediate check for login
+		    if (!user || user.trim() === "") {
+		        alert("🛑 You must be logged in with a valid email.");
+		        window.location = "/api/manager/loginform";
+		        return; // stop execution
+		    }
+
+		    // If valid, load assigned tab by default
+		    loadTrackingTasks("assigned");
+		});
+
+
+		/* -------------------------------
+		   TAB SWITCHING
+		--------------------------------*/
+		function showTab(tab) {
+			if (tab !== 'assigned' && tab !== 'fileClosed') {
+				console.error("Invalid tab value:", tab);
+				tab = 'assigned'; // Fallback to 'assigned'
+			}
+			document.getElementById("tabTitle").innerText = tab === "assigned" ? "Assigned Resumes" : "File Closed Resumes";
+			document.getElementById("assignedTable").style.display = tab === "assigned" ? "" : "none";
+			document.getElementById("closedTable").style.display = tab === "fileClosed" ? "" : "none";
+			document.querySelectorAll(".tab-btn").forEach((btn, i) => {
+				btn.classList.toggle("active", (i === 0 && tab === "assigned") || (i === 1 && tab === "fileClosed"));
+			});
+			loadTrackingTasks(tab);
+		}
+
+
+		/* -------------------------------
+		   FETCH & LOAD DATA
+		--------------------------------*/
+		async function loadTrackingTasks(tab) {
+			tab = tab || 'assigned'; // Fallback to 'assigned' if tab is null/undefined
+			const managerEmail = localStorage.getItem("managerEmail");
+			try {
+				const url = `/api/manager/assignedtasks?managerEmail=${encodeURIComponent(managerEmail)}&tab=${tab}`;
+				const res = await fetch(url);
+				if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+				const data = await res.json();
+				renderTrackingTables(data, tab);
+			} catch (e) {
+				alert("Failed to load tasks.");
+			}
+		}
+
+		/* -------------------------------
+		   RENDER TABLES
+		--------------------------------*/
+		function renderTrackingTables(tasks, tab) {
+			const assignedTableBody = document.getElementById("assignedTable").getElementsByTagName('tbody')[0];
+			const closedTableBody = document.getElementById("closedTable").getElementsByTagName('tbody')[0];
+
+			const tableBody = tab === 'fileClosed' ? closedTableBody : assignedTableBody;
+			tableBody.innerHTML = "";
+			
+			if (tasks.length === 0) {
+				tableBody.innerHTML = `<tr><td colspan="50" style="text-align:center;">No Tracking Details found.</td></tr>`;
+				return;
+			}
+			tasks.forEach((t, idx) => {
+				const row = tableBody.insertRow();
+				row.innerHTML = `
+		            <td>${idx + 1}</td>
+		            <td>${t.name ?? "N/A"}</td>
+		            <td>${t.email ?? "N/A"}</td>
+		            <td>${t.admin ?? "N/A"}</td>
+		            <td>${t.qualification ?? "N/A"}</td>
+		            <td>${t.phone ?? "N/A"}</td>
+		            <td>${t.callStatus ?? "N/A"}</td>
+		            <td>${t.answeredCall ?? "N/A"}</td>
+		            <td>${t.lookingForJob ?? "N/A"}</td>
+		            <td>${t.eligibleForClient ?? "N/A"}</td>
+		            <td>${t.telephoneInterview ?? "N/A"}</td>
+		            <td>${t.hrInterview ?? "N/A"}</td>
+		            <td>${t.operationRound ?? "N/A"}</td>
+		            <td>${t.versantVoice ?? "N/A"}</td>
+		            <td>${t.documentation ?? "N/A"}</td>
+		            <td>${t.offerLetter ?? "N/A"}</td>
+		            <td>${t.joining ?? "N/A"}</td>
+		            <td>${t.finalStatus ?? "N/A"}</td>
+		            <td><button class="view-btn" onclick="showResumeDetails(${t.id})">View</td>
+		        `;
+			});
+
+			// ✅ Populate filters dynamically only with values present in this tab’s data
+			buildFilters(tasks, tab);
+
+			applyFilters();
+		}
+
+		/* -------------------------------
+		   MODAL FOR DETAILS
+		--------------------------------*/
+		async function showResumeDetails(resumeId) {
+			console.log("Opening details for resumeId:", resumeId);
+			try {
+				const response = await fetch(`/api/manager/user/${resumeId}`);
+
+				if (response.status === 404) {
+					alert("User not found");
+					return;
+				}
+				if (!response.ok) throw new Error("Failed to fetch user details");
+
+				const resume = await response.json();
+
+				const detailsModal = document.getElementById("detailsModal");
+				const detailsFields = document.getElementById("detailsFields");
+
+				if (!detailsFields) {
+					console.error("detailsFields div not found in DOM");
+					return;
+				}
+
+				// Align fields with backend
+				const fieldsToShow = {
+					callStatus: "Calling Status",
+					answeredCall: "Answered Call",
+					lookingForJob: "Looking For Job",
+					eligibleForClient: "Eligible For Client",
+					telephoneInterview: "Telephonic Interview",
+					hrInterview: "HR Interview",
+					operationRound: "Operation Round",
+					versantVoice: "Versant Voice",
+					documentation: "Documentation",
+					offerLetter: "Offer Letter",
+					joining: "Joining",
+					finalStatus: " finalStatus"
+				};
+
+				detailsFields.innerHTML = Object.entries(fieldsToShow).map(([key, label]) => `
+	            <div>
+	                <strong>${label}:</strong>
+	                <span>${resume[key] ?? "N/A"}</span>
+	            </div>
+	        `).join("");
+
+				detailsModal.classList.add("active");
+			} catch (err) {
+				alert("Error loading resume details");
+			}
+		}
+
+		function closeDetailsModal() {
+			const detailsModal = document.getElementById("detailsModal");
+			detailsModal.classList.remove("active");
+		}
+
+		/* -------------------------------
+		   FILTERING (Case-Insensitive)
+		--------------------------------*/
+		function applyFilters() {
+			const searchValue = document.getElementById("searchInput").value.toLowerCase();
+
+			["assignedTable", "closedTable"].forEach(tableId => {
+				const table = document.getElementById(tableId);
+				if (!table) return;
+
+				const tBody = table.getElementsByTagName('tbody')[0];
+				if (!tBody) return;
+
+				const suffix = tableId === "closedTable" ? "Closed" : "";
+
+				const filters = {
+					callingStatus: (document.getElementById(`filterCallingStatus${suffix}`)?.value || "").toLowerCase(),
+					answeredCall: (document.getElementById(`filterAnsweredCall${suffix}`)?.value || "").toLowerCase(),
+					lookingForJob: (document.getElementById(`filterLookingForJob${suffix}`)?.value || "").toLowerCase(),
+					eligibleForClient: (document.getElementById(`filterEligibleForClient${suffix}`)?.value || "").toLowerCase(),
+					telephoneInterview: (document.getElementById(`filterTelephoneInterview${suffix}`)?.value || "").toLowerCase(),
+					hrInterview: (document.getElementById(`filterHrInterview${suffix}`)?.value || "").toLowerCase(),
+					operationRound: (document.getElementById(`filterOperationRound${suffix}`)?.value || "").toLowerCase(),
+					versantVoice: (document.getElementById(`filterVersantVoice${suffix}`)?.value || "").toLowerCase(),
+					documentation: (document.getElementById(`filterDocumentation${suffix}`)?.value || "").toLowerCase(),
+					offerLetter: (document.getElementById(`filterOfferLetter${suffix}`)?.value || "").toLowerCase(),
+					joining: (document.getElementById(`filterJoining${suffix}`)?.value || "").toLowerCase(),
+					finalStatus: (document.getElementById(`filterFinalStatus${suffix}`)?.value || "").toLowerCase(),
+				};
+
+				for (let i = 0; i < tBody.rows.length; i++) {
+					const row = tBody.rows[i];
+					const cell = (idx) => (row.cells[idx]?.textContent || "").toLowerCase();
+
+					const adminName = cell(3);
+
+					const values = [
+						cell(6),  // Calling Status
+						cell(7),  // Answered Call
+						cell(8),  // Looking For Job
+						cell(9),  // Eligible For Client
+						cell(10), // Telephonic Interview
+						cell(11), // HR Interview
+						cell(12), // Operation Round
+						cell(13), // Versant Voice
+						cell(14), // Documentation
+						cell(15), // Offer Letter
+						cell(16), // Joining
+						cell(17)  // Final Status  -> values[11]
+					];
+
+					const match =
+						adminName.includes(searchValue) &&
+						(filters.callingStatus === "" || values[0] === filters.callingStatus) &&
+						(filters.answeredCall === "" || values[1] === filters.answeredCall) &&
+						(filters.lookingForJob === "" || values[2] === filters.lookingForJob) &&
+						(filters.eligibleForClient === "" || values[3] === filters.eligibleForClient) &&
+						(filters.telephoneInterview === "" || values[4] === filters.telephoneInterview) &&
+						(filters.hrInterview === "" || values[5] === filters.hrInterview) &&
+						(filters.operationRound === "" || values[6] === filters.operationRound) &&
+						(filters.versantVoice === "" || values[7] === filters.versantVoice) &&
+						(filters.documentation === "" || values[8] === filters.documentation) &&
+						(filters.offerLetter === "" || values[9] === filters.offerLetter) &&
+						(filters.joining === "" || values[10] === filters.joining) &&
+						(filters.finalStatus === "" || values[11] === filters.finalStatus); // ✅ fixed index
+
+					row.style.display = match ? "" : "none";
+				}
+			});
+		}
+
+		function buildFilters(tasks, tab) {
+			const suffix = tab === "fileClosed" ? "Closed" : "";
+
+			const fields = [
+				{key: "callStatus", selectId: "filterCallingStatus"},
+				{key: "answeredCall", selectId: "filterAnsweredCall"},
+				{key: "lookingForJob", selectId: "filterLookingForJob"},
+				{key: "eligibleForClient", selectId: "filterEligibleForClient"},
+				{key: "telephoneInterview", selectId: "filterTelephoneInterview"},
+				{key: "hrInterview", selectId: "filterHrInterview"},
+				{key: "operationRound", selectId: "filterOperationRound"},
+				{key: "versantVoice", selectId: "filterVersantVoice"},
+				{key: "documentation", selectId: "filterDocumentation"},
+				{key: "offerLetter", selectId: "filterOfferLetter"},
+				{key: "joining", selectId: "filterJoining"},
+				{key: "finalStatus", selectId: "filterFinalStatus"}
+			];
+
+			fields.forEach(({key, selectId}) => {
+				const select = document.getElementById(selectId + suffix);
+				if (!select) return;
+
+				// clear previous options except "All"
+				select.querySelectorAll("option:not([value=''])").forEach(o => o.remove());
+
+				// normalize values: lowercase for uniqueness, but keep original for display
+				const valueMap = new Map();
+
+				tasks.forEach(u => {
+					let v = u[key];
+					if (v && v.trim() !== "") {
+						const normalized = v.trim().toLowerCase();
+						if (!valueMap.has(normalized)) {
+							// store with original formatting (first occurrence)
+							valueMap.set(normalized, v.trim());
+						}
+					}
+				});
+
+				// append unique options
+				[...valueMap.values()].forEach(val => {
+					const opt = document.createElement("option");
+					opt.value = val;
+					opt.textContent = val;
+					select.appendChild(opt);
+				});
+			});
+		}
+
+	</script>
+</body>
+
+</html>

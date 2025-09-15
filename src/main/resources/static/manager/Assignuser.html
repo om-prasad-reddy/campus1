@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Resume Assignment</title>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+	<script src="navigation.js"></script>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		/* Page-specific styles */
+		.toggle-buttons {
+			display: flex;
+			justify-content: center;
+			gap: 20px;
+			margin: 25px 0;
+		}
+
+		.toggle-buttons button {
+			flex: 1;
+			max-width: 300px;
+			background-color: #3b82f6;
+			color: white;
+			border: none;
+			padding: 15px;
+			font-size: 16px;
+			border-radius: 10px;
+			cursor: pointer;
+			transition: background 0.3s ease;
+		}
+
+		.tab-btn.active {
+			background-color: #3b82f6;
+			color: white;
+		}
+
+		.tab-btn:not(.active) {
+			background-color: #e5e7eb;
+			color: #4b5563;
+		}
+
+		.tab-btn:not(.active):hover {
+			background-color: #d1d5db;
+		}
+
+		#rangeSelector {
+		 background: linear-gradient(135deg, #e0f2fe, #ede9fe);
+			padding: 15px;
+			margin-bottom: 20px;
+			border-radius: 8px;
+			box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			flex-wrap: wrap;
+		}
+
+		#rangeSelector input {
+			width: 80px;
+			padding: 6px;
+			border: 1px solid #d1d5db;
+			border-radius: 4px;
+		}
+
+		#rangeSelector button {
+			padding: 8px 16px;
+			background-color: #10b981;
+			color: white;
+			border: none;
+			border-radius: 15px;
+			cursor: pointer;
+			transition: background-color 0.2s ease;
+		}
+
+		#rangeSelector button:hover {
+			background-color: #059669;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			background-color: white;
+			margin-bottom: 30px;
+			border-radius: 10px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+			overflow: hidden;
+		}
+
+		th,
+		td {
+			padding: 14px 16px;
+			text-align: left;
+			border-bottom: 1px solid #e5e7eb;
+		}
+
+		th {
+			background-color: #3b82f6;
+			color: white;
+		}
+
+		tr:hover td {
+			background-color: #f1f5f9;
+		}
+
+		.assign-selected-btn {
+			background-color: #10b981;
+			color: white;
+			padding: 10px 20px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+		}
+
+		.assign-selected-btn:hover {
+			background-color: #059669;
+		}
+
+		.hidden {
+			display: none;
+		}
+
+		.modal {
+			display: none;
+			position: fixed;
+			z-index: 2000;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			background: rgba(0, 0, 0, 0.5);
+			justify-content: center;
+			align-items: center;
+		}
+
+		.modal.show {
+			display: flex;
+		}
+
+
+		.modal-content {
+			background: #ffffff;
+			padding: 25px;
+			border-radius: 10px;
+			width: 300px;
+			text-align: center;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		}
+
+		.modal-content select {
+			width: 100%;
+			padding: 8px;
+			margin: 15px 0;
+			border-radius: 4px;
+			border: 1px solid #d1d5db;
+		}
+
+		.modal-content button {
+			margin: 6px;
+			padding: 10px 20px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+		}
+
+		.modal-content button:first-of-type {
+			background-color: #3b82f6;
+			color: white;
+		}
+
+		.modal-content button:last-of-type {
+			background-color: #e5e7eb;
+			color: #1f2937;
+		}
+
+		.modal-content button:first-of-type:hover {
+			background-color: #2563eb;
+		}
+
+		.modal-content button:last-of-type:hover {
+			background-color: #d1d5db;
+		}
+
+		.search-box {
+			padding: 10px 14px;
+			width: 320px;
+			border: 1px solid #d1d5db;
+			border-radius: 8px;
+			font-size: 16px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+			margin-bottom: 15px;
+			transition: all 0.2s ease;
+		}
+
+		.search-box:focus {
+			outline: none;
+			border-color: rgb(0, 128, 128);
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+		}
+	</style>
+</head>
+
+<body>
+	<div class="main">
+
+		<div class="toggle-buttons">
+			<button class="tab-btn active" onclick="showTab('notAssigned')">Not Assigned</button>
+			<button class="tab-btn" onclick="showTab('assigned')">Assigned</button>
+		</div>
+
+		<div id="rangeSelector">
+			<label>Select range: </label>
+			Start: <input type="number" id="rangeStart" value="1" min="1" max="50" />
+			End: <input type="number" id="rangeEnd" value="2" min="1" max="50" />
+			<button onclick="selectRange()">Select Range</button>
+			<button class="assign-selected-btn" onclick="openModal()">Select Admin</button>
+		</div>
+
+		<div>
+			<input type="text" id="searchInput" placeholder="Search by name or email" onkeyup="filterUsers()"
+				class="search-box" />
+		</div>
+
+		<!-- Not Assigned Table -->
+		<div id="notAssigned">
+			<h2>Un-Assigned Candidates</h2><br>
+			<table>
+				<thead>
+					<tr>
+						<th><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll(this)" /></th>
+						<th>S.no</th>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Qualification</th>
+					</tr>
+				</thead>
+				<tbody id="notAssignedTable"></tbody>
+			</table>
+		</div>
+
+		<!-- Assigned Table -->
+		<div id="assigned" class="hidden">
+			<h2>Assigned Candidates</h2><br>
+			<table>
+				<thead>
+					<tr>
+						<th>S.No</th>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Qualification</th>
+						<th>Assigned To</th>
+						<th>Assigned Date</th>
+					</tr>
+				</thead>
+				<tbody id="assignedTable"></tbody>
+			</table>
+		</div>
+	</div>
+
+	<!-- Assign Modal -->
+	<div class="modal" id="assignModal">
+		<div class="modal-content">
+			<h3>Select Admin to Assign</h3>
+			<select id="adminSelect">
+				<option value="">-- Select Admin --</option>
+			</select>
+			<div>
+				<button onclick="assignSelected()">Assign</button>
+				<button onclick="closeModal()">Cancel</button>
+			</div>
+		</div>
+	</div>
+	<script>
+
+		// Global arrays
+		let selectedUserIds = [];
+		let lastSelectedRange = {start: null, end: null};
+		let users = [];         // Not assigned
+		let admins = [];        // Admins under manager
+		let assignedUsers = []; // Assigned
+		let currentTab = "notAssigned"; // default
+
+		document.addEventListener("DOMContentLoaded", () => {
+			showTab("notAssigned"); // default
+			if (window.navigation) {
+				setTimeout(() => window.navigation.setHeaderTitle('Assign Users'), 100);
+			}
+			document.getElementById("searchInput")?.addEventListener("input", filterUsers);
+			document.getElementById("selectAllCheckbox")?.addEventListener("change", e => toggleSelectAll(e.target));
+		});
+
+		/* -------------------------------
+		   TAB SWITCHING
+		--------------------------------*/
+		function showTab(tab) {
+		    if (tab !== "assigned" && tab !== "notAssigned") {
+		        console.error("Invalid tab:", tab);
+		        tab = "notAssigned";
+		    }
+
+		    currentTab = tab;
+
+		    // Toggle button styles
+		    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+		    if (tab === "notAssigned") {
+		        document.querySelector(".tab-btn:nth-child(1)").classList.add("active");
+		    } else {
+		        document.querySelector(".tab-btn:nth-child(2)").classList.add("active");
+		    }
+
+		    // Show/hide sections
+		    document.getElementById("notAssigned").classList.toggle("hidden", tab !== "notAssigned");
+		    document.getElementById("assigned").classList.toggle("hidden", tab !== "assigned");
+
+		    // Clear selections
+		    selectedUserIds = [];
+		    lastSelectedRange = {start: null, end: null};
+		    document.getElementById("selectAllCheckbox").checked = false;
+
+		    // 🔹 Disable/enable the entire range/admin section and selectAll checkbox
+		    const rangeSection = document.getElementById("rangeSelector");
+		    if (rangeSection) {
+		        rangeSection.querySelectorAll("input, button, select").forEach(el => {
+		            el.disabled = (tab === "assigned");
+		        });
+		    }
+
+		    // Disable/enable checkboxes in the table
+		    document.querySelectorAll(".userCheckbox").forEach(chk => {
+		        chk.disabled = (tab === "assigned");
+		    });
+		    document.getElementById("selectAllCheckbox").disabled = (tab === "assigned");
+
+		    // Change search placeholder
+		    const searchInput = document.getElementById("searchInput");
+		    searchInput.placeholder = tab === "notAssigned" ?
+		        "Search by name or email" :
+		        "Search by name or email";
+
+		    // Fetch data
+		    loadData(tab);
+		}
+
+		/* -------------------------------
+		   FETCH DATA
+		--------------------------------*/
+		async function loadData(tab) {
+			const managerEmail = localStorage.getItem("managerEmail");
+			if (!managerEmail || managerEmail.trim() === '') {
+				alert("You must be logged in with a valid email.");
+				return window.location = "/api/manager/loginform";
+			}
+			try {
+				// Fetch users
+				const usersResp = await fetch(`/api/manager/mytasks?managerEmail=${encodeURIComponent(managerEmail)}&tab=${tab}`);
+				if (!usersResp.ok) throw new Error("Failed to load users");
+				const data = await usersResp.json();
+
+				if (tab === "assigned") {
+					assignedUsers = data;
+					populateAssignedTable();
+				} else {
+					users = data;
+					renderNotAssigned();
+				}
+
+				// Fetch admins
+				if (admins.length === 0) {
+					const adminsResp = await fetch(`/api/manager/admins?managerEmail=${encodeURIComponent(managerEmail)}`);
+					if (!adminsResp.ok) throw new Error("Failed to load admins");
+					admins = await adminsResp.json();
+					populateAdminSelect();
+				}
+			} catch (e) {
+				alert("Error loading data: " + e.message);
+			}
+		}
+
+		/* -------------------------------
+		   TABLE RENDERING
+		--------------------------------*/
+		function populateAdminSelect() {
+			const sel = document.getElementById("adminSelect");
+			sel.innerHTML = '<option value="">-- Select Admin --</option>';
+			admins.forEach(admin => {
+				const opt = document.createElement("option");
+				opt.value = admin.id;
+				opt.textContent = `${admin.name} (${admin.email || ''})`;
+				sel.appendChild(opt);
+			});
+		}
+
+		// Filter and render users
+		function filterUsers() {
+		  const searchValue = document.getElementById("searchInput").value.toLowerCase();
+
+		  if (document.getElementById("notAssigned").classList.contains("hidden") === false) {
+		    // Filtering not assigned
+		    const filtered = users.filter(u =>
+		      (u.name && u.name.toLowerCase().includes(searchValue)) ||
+		      (u.email && u.email.toLowerCase().includes(searchValue))
+		    );
+		    renderNotAssigned(filtered);
+		  } else {
+		    // Filtering assigned
+		    const filtered = assignedUsers.filter(u =>
+		      (u.name && u.name.toLowerCase().includes(searchValue)) ||
+		      (u.email && u.email.toLowerCase().includes(searchValue)) ||
+		      (u.admin && u.admin.toLowerCase().includes(searchValue))
+		    );
+		    populateAssignedTable(filtered);
+		  }
+		}
+
+		function renderNotAssigned(list = users) {
+		    const tbody = document.getElementById("notAssignedTable");
+		    tbody.innerHTML = "";
+		    if (list.length === 0) {
+		        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No unassigned users found.</td></tr>`;
+		        return;
+		    }
+		    list.forEach((user, index) => {
+		        const isChecked = selectedUserIds.includes(user.id) ? 'checked' : '';
+		        tbody.insertAdjacentHTML("beforeend", `
+		            <tr>
+		                <td><input type="checkbox" class="userCheckbox" data-id="${user.id}" ${isChecked} /></td>
+		                <td>${index + 1}</td>
+		                <td>${user.name || ''}</td>
+		                <td>${user.email || ''}</td>
+		                <td>${user.qualification || ''}</td>
+		            </tr>
+		        `);
+		    });
+
+		    // Checkbox listeners
+		    document.querySelectorAll(".userCheckbox").forEach(chk => {
+		        chk.disabled = (currentTab === "assigned");
+		        chk.addEventListener("change", () => {
+		            const userId = parseInt(chk.dataset.id, 10);
+		            if (chk.checked) {
+		                if (!selectedUserIds.includes(userId)) selectedUserIds.push(userId);
+		            } else {
+		                selectedUserIds = selectedUserIds.filter(id => id !== userId);
+		            }
+		            document.getElementById("selectAllCheckbox").checked = false;
+		        });
+		    });
+		}
+
+		// Render assigned users (now accepts optional list)
+		function populateAssignedTable(list = assignedUsers) {
+		  const table = document.getElementById("assignedTable");
+		  table.innerHTML = "";
+
+		  if (!list || list.length === 0) {
+		    table.innerHTML = `<tr><td colspan="6" style="text-align:center;">No assigned users found.</td></tr>`;
+		    return;
+		  }
+
+		  list.forEach((user, index) => {
+		    table.innerHTML += `
+		      <tr>
+		        <td>${index + 1}</td>
+		        <td>${user.name || ''}</td>
+		        <td>${user.email || ''}</td>
+		        <td>${user.qualification || 'N/A'}</td>
+		        <td>${user.admin || ''}</td>
+		        <td>${user.assignedDate || 'N/A'}</td>
+		      </tr>`;
+		  });
+		}
+
+		/* -------------------------------
+		   ASSIGN LOGIC
+		--------------------------------*/
+		function toggleSelectAll(cb) {
+			const checked = cb.checked;
+			document.querySelectorAll(".userCheckbox").forEach(chk => {
+				chk.checked = checked;
+				const userId = parseInt(chk.dataset.id, 10);
+				if (checked) {
+					if (!selectedUserIds.includes(userId)) selectedUserIds.push(userId);
+				} else {
+					selectedUserIds = [];
+				}
+			});
+		}
+
+		function selectRange() {
+		    if (currentTab === "assigned") return; // Disabled in assigned tab
+
+		    const start = parseInt(document.getElementById("rangeStart").value, 10);
+		    const end = parseInt(document.getElementById("rangeEnd").value, 10);
+
+		    if (isNaN(start) || isNaN(end) || start < 1 || end < start) {
+		        alert("Invalid range");
+		        return;
+		    }
+
+		    const checkboxes = document.querySelectorAll(".userCheckbox");
+		    if (checkboxes.length === 0) {
+		        alert("No users available");
+		        return;
+		    }
+
+		    const isSameRange = lastSelectedRange.start === start && lastSelectedRange.end === end;
+		    const shouldSelect = !isSameRange; // toggle selection
+
+		    // Clear all selections first
+		    checkboxes.forEach(chk => chk.checked = false);
+		    selectedUserIds = [];
+
+		    if (shouldSelect) {
+		        // Select the new range
+		        checkboxes.forEach((chk, idx) => {
+		            const sr = idx + 1;
+		            const userId = parseInt(chk.dataset.id, 10);
+		            if (sr >= start && sr <= end) {
+		                chk.checked = true;
+		                selectedUserIds.push(userId);
+		            }
+		        });
+		        lastSelectedRange = { start, end };
+		    } else {
+		        // Deselecting same range
+		        lastSelectedRange = { start: null, end: null };
+		    }
+
+		    // Uncheck "select all" checkbox
+		    document.getElementById("selectAllCheckbox").checked = false;
+		}
+
+		function openModal() {
+		    if (currentTab === "assigned") return; // Disabled in assigned tab
+		    if (selectedUserIds.length === 0) {
+		        alert("Please select at least one user");
+		        return;
+		    }
+		    document.getElementById("assignModal").classList.add("show");
+		}
+		function closeModal() {
+		    document.getElementById("assignModal").classList.remove("show");
+		}
+
+		async function assignSelected() {
+		    if (currentTab === "assigned") return; // Disabled in assigned tab
+		    const adminId = document.getElementById("adminSelect").value;
+		    if (!adminId) {
+		        alert("Please select an admin");
+		        return;
+		    }
+		    const managerEmail = localStorage.getItem("managerEmail");
+
+		    try {
+		        const res = await fetch("/api/manager/assign-multiple-tasks", {
+		            method: "POST",
+		            headers: {"Content-Type": "application/json"},
+		            body: JSON.stringify({managerEmail, adminId, userIds: selectedUserIds})
+		        });
+		        if (!res.ok) throw new Error(await res.text());
+		        alert("Users assigned successfully!");
+		        selectedUserIds = [];
+		        closeModal();
+		        showTab("notAssigned"); // reload notAssigned after assignment
+		    } catch (e) {
+		        alert("Error: " + e.message);
+		    }
+		}
+	</script>
+</body>
+</html>

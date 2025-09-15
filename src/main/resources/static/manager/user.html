@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Manager Profile</title>
+	<!-- Font Awesome for icons -->
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+	<!-- Tailwind CSS CDN -->
+	<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+	<script src="navigation.js"></script>
+	<style>
+		.profile-card {
+			background-color: #ffffff;
+			border-radius: 12px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+			max-width: 500px;
+			margin: 0 auto;
+			top:5px;
+		}
+
+		.profile-row,
+		.profile-row-multi {
+			margin-bottom: 1rem;
+		}
+
+		.profile-row-multi {
+			display: flex;
+			gap: 1rem;
+		}
+
+		.profile-row-multi div {
+			flex: 1;
+		}
+
+		.profile-logo {
+			width: 128px;
+			height: 128px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin: 0 auto 1rem auto;
+			position: relative;
+			border: 2px solid black;
+		}
+
+		#change-pic-label {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 50%;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    cursor: pointer;
+}
+
+		/* Show when container is in editable mode */
+#photo-container.editable #change-pic-label {
+    opacity: 1;
+}
+		input[type="text"],
+		input[type="email"] {
+			width: 100%;
+			padding: 0.5rem 0.75rem;
+			border: 1px solid #d1d5db;
+			border-radius: 6px;
+			background-color: #f9fafb;
+			color: #1f2937;
+		}
+
+		.editable-field.editable {
+			border-color: #3b82f6;
+			background-color: #ffffff;
+		}
+
+		.btn {
+			padding: 0.5rem 1rem;
+			border-radius: 6px;
+			font-weight: 500;
+			cursor: pointer;
+		}
+
+		.btn-edit {
+			background-color: #3b82f6;
+			color: white;
+		}
+
+		.btn-save {
+			background-color: #10b981;
+			color: white;
+		}
+
+		.btn-cancel {
+			background-color: red;
+			color: white;
+		}
+
+		.btn-remove {
+			background-color: #6b7280;
+			color: white;
+		}
+
+		.hidden {
+			display: none;
+		}
+
+		#image-upload {
+			display: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="main flex justify-center items-center min-h-screen px-4 sm:px-6 lg:px-8">
+		<div class="content w-full max-w-md sm:max-w-lg">
+			<div class="profile-card p-6 sm:p-8">
+				<!-- Profile Logo -->
+				<div class="profile-logo relative w-32 h-32 mx-auto mb-4" id="photo-container">
+					<img id="profile-img" class="w-full h-full object-cover rounded-full">
+					<label for="image-upload" id="change-pic-label"
+						class="absolute inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center opacity-0 cursor-pointer transition-opacity duration-300 rounded-full hidden">
+						Change Picture
+					</label>
+					<input type="file" id="image-upload" class="hidden" accept="image/*" disabled>
+				</div>
+
+				<h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-2"></h1>
+				<p class="text-gray-600 text-center mb-6">Manage your information and account status.</p>
+
+				<!-- Personal Information -->
+				<div class="profile-row mb-4">
+					<label for="name-input" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+					<input type="text" id="name-input" class="editable-field" readonly />
+				</div>
+				<div class="profile-row mb-4">
+					<label for="email-input" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+					<input type="email" id="email-input" readonly />
+				</div>
+				<div class="profile-row-multi mb-4">
+					<div>
+						<label for="role-input" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+						<input type="text" id="role-input" readonly />
+					</div>
+					<div>
+						<label for="phone-input" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+						<input type="text" id="phone-input" class="editable-field" readonly />
+					</div>
+				</div>
+				<div class="profile-row mb-4">
+					<label for="address-input" class="block text-sm font-medium text-gray-700 mb-1">Full Address</label>
+					<input type="text" id="address-input" class="editable-field" readonly />
+				</div>
+
+				<!-- Action Buttons -->
+				<div class="flex justify-end mt-6 space-x-3">
+					<button id="edit-btn" class="btn btn-edit">Edit Profile</button>
+					<button id="remove-pic-btn" class="btn btn-remove hidden">Remove Picture</button>
+					<button id="save-btn" class="btn btn-save hidden">Save Changes</button>
+					<button id="cancel-btn" class="btn btn-cancel hidden">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			const email = localStorage.getItem("managerEmail");
+			if (!email) {
+				alert("Login required");
+				window.location.href = "/api/manager/loginform";
+				return;
+			}
+
+			const profileImg = document.getElementById("profile-img");
+			const fileInput = document.getElementById("image-upload");
+			const photoContainer = document.getElementById("photo-container");
+			const changePicLabel = document.getElementById("change-pic-label");
+			const editBtn = document.getElementById("edit-btn");
+			const saveBtn = document.getElementById("save-btn");
+			const removePicBtn = document.getElementById("remove-pic-btn");
+			const cancelBtn = document.getElementById("cancel-btn");
+			const inputs = document.querySelectorAll("input.editable-field");
+			let originalProfile = {};
+
+			// default avatar from Google if no image found
+			const DEFAULT_AVATAR = "https://www.w3schools.com/w3images/avatar2.png";
+
+			async function loadProfile() {
+				try {
+					const res = await fetch(`/api/manager/profile?email=${encodeURIComponent(email)}`);
+					if (!res.ok) throw new Error("Failed to load profile");
+					const manager = await res.json();
+
+					profileImg.src = manager.imageBase64 || DEFAULT_AVATAR;
+					profileImg.style.display = "block";
+					profileImg.alt = `Profile photo of ${manager.name || "Manager"}`;
+
+					document.querySelector("h1").textContent = `${manager.name || ""}`;
+					document.getElementById("name-input").value = manager.name || "";
+					document.getElementById("email-input").value = manager.email || "";
+					document.getElementById("role-input").value = manager.role || "";
+					document.getElementById("phone-input").value = manager.phone || "";
+					document.getElementById("address-input").value = manager.address || "";
+				} catch (err) {
+					console.error(err);
+					alert("Failed to load profile");
+				}
+			}
+
+			loadProfile();
+
+			// Edit Mode
+			editBtn.addEventListener("click", () => {
+				originalProfile = {
+					name: document.getElementById("name-input").value,
+					phone: document.getElementById("phone-input").value,
+					address: document.getElementById("address-input").value,
+					imageSrc: profileImg.src,
+				};
+				inputs.forEach((input) => {
+					input.removeAttribute("readonly");
+					input.classList.add("editable");
+				});
+				photoContainer.classList.add("editable");
+				fileInput.removeAttribute("disabled");
+				changePicLabel.classList.remove("hidden");
+				removePicBtn.classList.remove("hidden");
+				editBtn.classList.add("hidden");
+				saveBtn.classList.remove("hidden");
+				cancelBtn.classList.remove("hidden");
+			});
+
+			// Remove Picture
+			removePicBtn.addEventListener("click", async () => {
+				if (!confirm("Are you sure you want to remove your profile picture?")) return;
+				try {
+					const response = await fetch(`/api/manager/profile/remove-picture?email=${encodeURIComponent(email)}`, {
+						method: "PUT"
+					});
+					if (!response.ok) throw new Error("Failed to remove profile picture");
+					alert("Profile picture removed successfully!");
+					await loadProfile();
+				} catch (err) {
+					console.error(err);
+					alert("❌ Could not remove profile picture.");
+				}
+			});
+
+			// Cancel Edit
+			cancelBtn.addEventListener("click", () => {
+				inputs.forEach((input) => {
+					input.setAttribute("readonly", true);
+					input.classList.remove("editable");
+				});
+				photoContainer.classList.remove("editable");
+				fileInput.setAttribute("disabled", true);
+				changePicLabel.classList.add("hidden");
+				document.getElementById("name-input").value = originalProfile.name;
+				document.getElementById("phone-input").value = originalProfile.phone;
+				document.getElementById("address-input").value = originalProfile.address;
+				profileImg.src = originalProfile.imageSrc || DEFAULT_AVATAR;
+				editBtn.classList.remove("hidden");
+				saveBtn.classList.add("hidden");
+				removePicBtn.classList.add("hidden");
+				cancelBtn.classList.add("hidden");
+				fileInput.value = "";
+			});
+
+			// Save Profile
+			saveBtn.addEventListener("click", async () => {
+				const updatedProfile = {
+					name: document.getElementById("name-input").value.trim(),
+					email: document.getElementById("email-input").value,
+					role: document.getElementById("role-input").value,
+					phone: document.getElementById("phone-input").value.trim(),
+					address: document.getElementById("address-input").value.trim(),
+				};
+
+				if (!updatedProfile.name || !updatedProfile.phone || !updatedProfile.address) {
+					alert("❌ All fields are required except email and role.");
+					return;
+				}
+
+				if (fileInput.files.length > 0) {
+					const file = fileInput.files[0];
+					const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
+					if (!validImageTypes.includes(file.type)) {
+						alert("❌ Please upload a valid image (JPEG, PNG, or GIF).");
+						return;
+					}
+					if (file.size > 5 * 1024 * 1024) {
+						alert("❌ Image size must be less than 5MB.");
+						return;
+					}
+				}
+
+				const formData = new FormData();
+				formData.append("manager", new Blob([JSON.stringify(updatedProfile)], {type: "application/json"}));
+				if (fileInput.files.length > 0) {
+					formData.append("profilePicture", fileInput.files[0]);
+				}
+
+				try {
+					const response = await fetch("/api/manager/profile/update", {
+						method: "PUT",
+						body: formData,
+					});
+					if (!response.ok) throw new Error("Profile update failed");
+
+					alert("Profile updated successfully!");
+					inputs.forEach((input) => {
+						input.setAttribute("readonly", true);
+						input.classList.remove("editable");
+					});
+					photoContainer.classList.remove("editable");
+					fileInput.setAttribute("disabled", true);
+					changePicLabel.classList.add("hidden");
+					editBtn.classList.remove("hidden");
+					saveBtn.classList.add("hidden");
+					cancelBtn.classList.add("hidden");
+					removePicBtn.classList.add("hidden");
+					fileInput.value = "";
+					await loadProfile();
+				} catch (err) {
+					console.error(err);
+					alert("❌ Failed to update profile.");
+				}
+			});
+
+			// Preview uploaded image
+			fileInput.addEventListener("change", (e) => {
+				if (e.target.files && e.target.files[0]) {
+					const reader = new FileReader();
+					reader.onload = function (ev) {
+						profileImg.src = ev.target.result;
+						profileImg.style.display = "block";
+					};
+					reader.readAsDataURL(e.target.files[0]);
+				}
+			});
+		});
+	</script>
+</body>
+
+</html>

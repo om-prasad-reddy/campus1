@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .info {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Admin Details - Enhanced Features Test</h1>
+        
+        <div class="info">
+            <h3>New Features Implemented:</h3>
+            <ul>
+                <li><strong>Universal Team Assignment:</strong> All admins now have 3-day team assignments with date filtering</li>
+                <li><strong>Date Filter:</strong> Filter data by specific dates (both in header and inside modal)</li>
+                <li><strong>Dynamic Updates:</strong> Pie chart and tables update based on selected date for all admins</li>
+                <li><strong>Ajith:</strong> Day 1 (3 users), Day 2 (3 users), Day 3 (4 users)</li>
+                <li><strong>John:</strong> Day 1 (3 users), Day 2 (3 users), Day 3 (1 user)</li>
+                <li><strong>Sneha:</strong> Day 1 (3 users), Day 2 (3 users), Day 3 (2 users)</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>Test Instructions:</h3>
+            <ol>
+                <li>Click "Open Admin Details" to go to the main page</li>
+                <li>Click on "Status" button for any admin (Ajith, John, or Sneha)</li>
+                <li><strong>All Admins:</strong> Observe the "3-Day Team Assignment" section showing day-wise distribution</li>
+                <li>Use the date filter inside the modal to filter by specific days</li>
+                <li>Use the date filter in the top-right corner of the main page</li>
+                <li>Select today's date to see Day 1 Team data for any admin</li>
+                <li>Select tomorrow's date to see Day 2 Team data</li>
+                <li>Select day after tomorrow to see Day 3 Team data</li>
+                <li>Notice how the pie chart and tables update dynamically for all admins</li>
+                <li>Click "Clear" to reset filters and see all data again</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>Expected Results by Admin:</h3>
+            <ul>
+                <li><strong>🏆 COMPETITIVE SCENARIO:</strong>
+                    <ul>
+                        <li><strong>Day 1 Winner: Ajith</strong> - 3 recruits vs John (1) vs Sneha (1)</li>
+                        <li><strong>Day 2 Winner: John</strong> - 3 recruits vs Ajith (0) vs Sneha (0)</li>
+                        <li><strong>Day 3 Winner: Sneha</strong> - 2 recruits vs Ajith (1) vs John (0)</li>
+                    </ul>
+                </li>
+                <li><strong>Ajith (10 users):</strong>
+                    <ul>
+                        <li>Day 1 Team: 3 users (0 In Progress, 3 Recruited) 🥇</li>
+                        <li>Day 2 Team: 3 users (1 In Progress, 0 Recruited, 2 Rejected)</li>
+                        <li>Day 3 Team: 4 users (1 In Progress, 1 Recruited, 2 Rejected)</li>
+                    </ul>
+                </li>
+                <li><strong>John (7 users):</strong>
+                    <ul>
+                        <li>Day 1 Team: 3 users (2 In Progress, 1 Recruited)</li>
+                        <li>Day 2 Team: 3 users (0 In Progress, 3 Recruited) 🥇</li>
+                        <li>Day 3 Team: 1 user (1 In Progress, 0 Recruited)</li>
+                    </ul>
+                </li>
+                <li><strong>Sneha (8 users):</strong>
+                    <ul>
+                        <li>Day 1 Team: 3 users (2 In Progress, 1 Recruited)</li>
+                        <li>Day 2 Team: 3 users (1 In Progress, 0 Recruited, 2 Rejected)</li>
+                        <li>Day 3 Team: 3 users (1 In Progress, 2 Recruited) 🥇</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>Quick Test Dates:</h3>
+            <p>Use these dates in the date filter to test the functionality:</p>
+            <button class="test-button" onclick="setTestDate(0)">Today (Day 1 Team - All Admins)</button>
+            <button class="test-button" onclick="setTestDate(1)">Tomorrow (Day 2 Team - All Admins)</button>
+            <button class="test-button" onclick="setTestDate(2)">Day After (Day 3 Team - All Admins)</button>
+            <p id="testDates" style="margin-top: 10px; font-size: 14px; color: #666;"></p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="test-button" onclick="window.open('AdminDetails.html', '_blank')" style="font-size: 16px; padding: 15px 30px;">
+                Open Admin Details Page
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function setTestDate(dayOffset) {
+            const today = new Date();
+            const testDate = new Date(today);
+            testDate.setDate(today.getDate() + dayOffset);
+            const dateString = testDate.toISOString().split('T')[0];
+            
+            const teamNames = ['Day 1 Team', 'Day 2 Team', 'Day 3 Team'];
+            alert(`Test Date: ${dateString}\nThis should show data for ${teamNames[dayOffset]}`);
+        }
+
+        // Display test dates
+        function displayTestDates() {
+            const today = new Date();
+            const dates = [];
+            for (let i = 0; i < 3; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                dates.push(date.toISOString().split('T')[0]);
+            }
+            document.getElementById('testDates').innerHTML = 
+                `Day 1: ${dates[0]} | Day 2: ${dates[1]} | Day 3: ${dates[2]}`;
+        }
+
+        displayTestDates();
+    </script>
+</body>
+</html>
